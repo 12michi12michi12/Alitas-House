@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Master - 100% Sincronizado</title>
+    <!-- Librería de Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        :root { --bg: #0d1117; --panel: #161b22; --accent: #39d353; --text: #f0f6fc; }
+        body { background: var(--bg); color: var(--text); font-family: system-ui; margin: 0; }
+        
+        /* Login simple */
+        #auth-view { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        .login-card { background: var(--panel); padding: 2rem; border-radius: 12px; border: 1px solid #30363d; width: 300px; }
+        
+        /* App */
+        #app-view { display: none; padding: 20px; }
+        .nav { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+        .btn { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; }
+        .btn-primary { background: var(--accent); color: #000; }
+        .btn-outline { background: transparent; border: 1px solid #30363d; color: var(--text); }
+        
+        .grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+        .panel { background: var(--panel); border: 1px solid #30363d; border-radius: 12px; padding: 15px; }
+        
+        input, select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: white; box-sizing: border-box; }
+        .menu-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+        .item-card { background: #21262d; padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; border: 1px solid #30363d; }
+    </style>
+</head>
+<body>
+
+    <!-- VISTA LOGIN -->
+    <div id="auth-view">
+        <div class="login-card">
+            <h2>Mi Negocio Cloud</h2>
+            <input type="email" id="email" placeholder="Correo">
+            <input type="password" id="pass" placeholder="Contraseña">
+            <button class="btn btn-primary" style="width: 100%" onclick="signIn()">ENTRAR / REGISTRARSE</button>
+            <p style="font-size: 12px; text-align: center; color: #8b949e">Tus datos se guardarán gratis en la nube.</p>
+        </div>
+    </div>
+
+    <!-- VISTA APP -->
+    <div id="app-view">
+        <div class="nav">
+            <h3 id="user-display" style="margin: 0; flex: 1;">Hola!</h3>
+            <button class="btn btn-outline" onclick="signOut()">Cerrar Sesión</button>
+        </div>
+
+        <div class="grid">
+            <div class="panel">
+                <h4>Añadir Producto</h4>
+                <input type="text" id="prod-nombre" placeholder="Nombre (ej. Birria)">
+                <input type="number" id="prod-precio" placeholder="Precio $">
+                <select id="prod-cat">
+                    <option value="plancha">Plancha</option>
+                    <option value="bebida">Bebida</option>
+                </select>
+                <button class="btn btn-primary" style="width: 100%" onclick="saveProduct()">Subir a la Nube</button>
+            </div>
+
+            <div class="panel">
+                <h4>Menú Sincronizado</h4>
+                <div id="menu-grid" class="menu-items"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURACIÓN DE SUPABASE ---
+        const SUPABASE_URL = 'https://twqscsjdhklectswcjml.supabase.co/rest/v1/';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3cXNjc2pkaGtsZWN0c3djam1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0Njc4OTAsImV4cCI6MjA5MzA0Mzg5MH0.8zz26TNZ26FUdFNYv0ao7kon79LBRbnzF_1MBbzttZk';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let userSession = null;
+
+        // 1. GESTIÓN DE SESIÓN
+        _supabase.auth.onAuthStateChange((event, session) => {
+            userSession = session;
+            if (session) {
+                document.getElementById('auth-view').style.display = 'none';
+                document.getElementById('app-view').style.display = 'block';
+                document.getElementById('user-display').innerText = `Negocio: ${session.user.email}`;
+                loadProducts();
+            } else {
+                document.getElementById('auth-view').style.display = 'flex';
+                document.getElementById('app-view').style.display = 'none';
+            }
+        });
+
+        async function signIn() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('pass').value;
+            // Intenta entrar, si falla intenta registrar (proceso automático)
+            const { error } = await _supabase.auth.signInWithPassword({ email, password });
+            if (error) {
+                const { error: signUpError } = await _supabase.auth.signUp({ email, password });
+                if (signUpError) alert("Error: " + signUpError.message);
+                else alert("¡Cuenta creada! Revisa tu email para confirmar (o entra directo si desactivaste confirmación)");
+            }
+        }
+
+        async function signOut() { await _supabase.auth.signOut(); }
+
+        // 2. GESTIÓN DE PRODUCTOS (NUBE)
+        async function saveProduct() {
+            const name = document.getElementById('prod-nombre').value;
+            const price = document.getElementById('prod-precio').value;
+            const cat = document.getElementById('prod-cat').value;
+
+            const { error } = await _supabase
+                .from('productos')
+                .insert([{ 
+                    nombre: name, 
+                    precio: parseFloat(price), 
+                    categoria: cat,
+                    user_id: userSession.user.id 
+                }]);
+
+            if (error) alert("Error al subir: " + error.message);
+            else {
+                document.getElementById('prod-nombre').value = '';
+                document.getElementById('prod-precio').value = '';
+                loadProducts();
+            }
+        }
+
+        async function loadProducts() {
+            const { data, error } = await _supabase
+                .from('productos')
+                .select('*')
+                .order('nombre', { ascending: true });
+
+            if (data) {
+                const grid = document.getElementById('menu-grid');
+                grid.innerHTML = '';
+                data.forEach(p => {
+                    grid.innerHTML += `
+                        <div class="item-card">
+                            <strong>${p.nombre}</strong><br>
+                            $${p.precio}
+                        </div>`;
+                });
+            }
+        }
+    </script>
+</body>
+</html>

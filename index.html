@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BODOBirria Cloud v5 - Finanzas Reales</title>
+    <title>BODOBirria POS - Versión Final</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -26,12 +26,10 @@
         .grid-pos { display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
         .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
         .card { background: #222; border: 2px solid #fff; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; font-weight: bold; }
-        .item-carrito { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #333; }
         .btn-del { background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; width: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #333; padding: 10px; text-align: left; font-size: 0.9rem; }
-        .resumen-caja { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .resumen-caja div { background: #222; padding: 15px; border-radius: 10px; border: 1px solid var(--accent); text-align: center; }
+        .btn-edit { background: var(--bebidas); color: #000; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; width: auto; margin-right: 5px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #333; padding: 10px; text-align: left; }
         @media (max-width: 900px) { .grid-pos { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -49,20 +47,20 @@
     <div id="app-view">
         <div style="background: #111; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center;">
             <span id="user-info" style="color: var(--accent); font-weight: bold;"></span>
-            <button onclick="signOut()" style="width:auto; background: var(--danger); padding: 5px 15px; border:none; cursor:pointer;">CERRAR SESIÓN</button>
+            <button onclick="signOut()" style="width:auto; background: var(--danger); padding: 5px 15px; border:none; cursor:pointer;">SALIR</button>
         </div>
 
         <nav class="tabs">
             <button class="tab-btn active" onclick="openTab('pos')">🛒 VENTAS</button>
+            <button class="tab-btn" onclick="openTab('inventario')">📦 MENÚ</button>
             <button class="tab-btn" onclick="openTab('gastos')">💸 GASTOS</button>
-            <button class="tab-btn" onclick="openTab('finanzas')">📊 CORTE Y CAJA</button>
+            <button class="tab-btn" onclick="openTab('finanzas')">📊 CORTE</button>
         </nav>
 
         <!-- VENTAS -->
         <div id="pos" class="tab-content active">
             <div class="grid-pos">
                 <div class="panel">
-                    <h3>MENÚ</h3>
                     <div id="grid-venta" class="menu-grid"></div>
                 </div>
                 <div class="panel">
@@ -75,37 +73,58 @@
             </div>
         </div>
 
-        <!-- GASTOS -->
-        <div id="gastos" class="tab-content">
+        <!-- INVENTARIO -->
+        <div id="inventario" class="tab-content">
             <div class="panel">
-                <h3>REGISTRAR GASTO DEL DÍA</h3>
-                <input type="text" id="g-concepto" placeholder="Ej. Gas, Carne, Refrescos">
-                <input type="number" id="g-monto" placeholder="Monto $">
-                <button class="btn-main" style="background: var(--plancha);" onclick="saveGasto()">REGISTRAR GASTO</button>
+                <h3 id="form-title">AGREGAR PRODUCTO</h3>
+                <input type="hidden" id="edit-id">
+                <input type="text" id="p-nombre" placeholder="Nombre del producto">
+                <input type="number" id="p-precio" placeholder="Precio $">
+                <select id="p-cat">
+                    <option value="plancha">Plancha</option>
+                    <option value="bebidas">Bebidas</option>
+                    <option value="freidora">Freidora</option>
+                </select>
+                <button class="btn-main" id="btn-save" onclick="saveProduct()">GUARDAR PRODUCTO</button>
+                <button class="btn-main" id="btn-cancel" style="background: #666; display:none;" onclick="resetForm()">CANCELAR EDICIÓN</button>
             </div>
             <div class="panel">
-                <h3>GASTOS DE HOY</h3>
-                <table id="tabla-gastos">
-                    <thead><tr><th>Concepto</th><th>Monto</th></tr></thead>
-                    <tbody id="lista-gastos-hoy"></tbody>
+                <table>
+                    <thead><tr><th>Producto</th><th>Precio</th><th>Categoría</th><th>Acciones</th></tr></thead>
+                    <tbody id="lista-prod-db"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- FINANZAS Y CORTE -->
+        <!-- GASTOS -->
+        <div id="gastos" class="tab-content">
+            <div class="panel">
+                <h3>REGISTRAR GASTO</h3>
+                <input type="text" id="g-concepto" placeholder="Concepto">
+                <input type="number" id="g-monto" placeholder="Monto $">
+                <button class="btn-main" style="background: var(--plancha);" onclick="saveGasto()">GUARDAR GASTO</button>
+            </div>
+            <div class="panel">
+                <table id="tabla-gastos">
+                    <thead><tr><th>Fecha</th><th>Concepto</th><th>Monto</th></tr></thead>
+                    <tbody id="lista-gastos-db"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- FINANZAS -->
         <div id="finanzas" class="tab-content">
-            <div class="resumen-caja">
+            <div class="panel" style="display: flex; justify-content: space-around; text-align: center;">
                 <div><h4>VENTAS HOY</h4><h2 id="c-ventas" style="color: var(--success);">$0</h2></div>
                 <div><h4>GASTOS HOY</h4><h2 id="c-gastos" style="color: var(--danger);">$0</h2></div>
                 <div><h4>NETO</h4><h2 id="c-neto" style="color: var(--bebidas);">$0</h2></div>
             </div>
+            <button class="btn-main" style="background: var(--accent); color: #000; font-size: 1.2rem; padding: 20px; margin-top: 10px;" onclick="realizarCorte()">REALIZAR CORTE DE CAJA</button>
             
-            <button class="btn-main" style="background: var(--accent); color: #000; font-size: 1.2rem; padding: 20px; margin-bottom: 30px;" onclick="realizarCorteDía()">REALIZAR CORTE DE CAJA FINAL</button>
-
-            <div class="panel">
-                <h3>HISTORIAL DE CORTES GUARDADOS</h3>
+            <div class="panel" style="margin-top: 20px;">
+                <h3>HISTORIAL DE CORTES</h3>
                 <table id="tabla-cortes">
-                    <thead><tr><th>Fecha</th><th>Ventas</th><th>Gastos</th><th>Balance</th></tr></thead>
+                    <thead><tr><th>Fecha</th><th>Ventas</th><th>Gastos</th><th>Neto</th></tr></thead>
                     <tbody id="lista-cortes-db"></tbody>
                 </table>
             </div>
@@ -120,8 +139,7 @@
         let userSession = null;
         let productos = [];
         let carrito = [];
-        let totalVentasHoy = 0;
-        let totalGastosHoy = 0;
+        let vHoy = 0, gHoy = 0;
 
         _supabase.auth.onAuthStateChange((event, session) => {
             userSession = session;
@@ -129,7 +147,7 @@
                 document.getElementById('auth-view').style.display = 'none';
                 document.getElementById('app-view').style.display = 'block';
                 document.getElementById('user-info').innerText = session.user.email;
-                loadInitialData();
+                loadEverything();
             } else {
                 document.getElementById('auth-view').style.display = 'flex';
                 document.getElementById('app-view').style.display = 'none';
@@ -144,19 +162,67 @@
 
         async function signOut() { await _supabase.auth.signOut(); window.location.reload(); }
 
-        async function loadInitialData() {
-            const { data: p } = await _supabase.from('productos').select('*').order('nombre');
-            productos = p || [];
-            renderMenu();
-            loadFinanzasHoy();
-            loadHistorialCortes();
+        async function loadEverything() {
+            await loadProducts();
+            await loadFinanzas();
+            await loadCortes();
         }
 
-        function renderMenu() {
+        // --- GESTIÓN DE PRODUCTOS ---
+        async function loadProducts() {
+            const { data } = await _supabase.from('productos').select('*').order('nombre');
+            productos = data || [];
             const grid = document.getElementById('grid-venta');
-            grid.innerHTML = productos.map(p => `<div class="card" style="border: 2px solid var(--${p.categoria})" onclick="addToCart(${p.id})">${p.nombre}<br>$${p.precio}</div>`).join('');
+            grid.innerHTML = productos.map(p => `<div class="card" style="border-color: var(--${p.categoria})" onclick="addToCart(${p.id})">${p.nombre}<br>$${p.precio}</div>`).join('');
+            
+            const lista = document.getElementById('lista-prod-db');
+            lista.innerHTML = productos.map(p => `<tr><td>${p.nombre}</td><td>$${p.precio}</td><td>${p.categoria}</td><td>
+                <button class="btn-edit" onclick="editForm(${p.id})">✎</button>
+                <button class="btn-del" onclick="deleteProd(${p.id})">✕</button>
+            </td></tr>`).join('');
         }
 
+        async function saveProduct() {
+            const id = document.getElementById('edit-id').value;
+            const nombre = document.getElementById('p-nombre').value;
+            const precio = document.getElementById('p-precio').value;
+            const categoria = document.getElementById('p-cat').value;
+
+            if(id) {
+                await _supabase.from('productos').update({ nombre, precio, categoria }).eq('id', id);
+            } else {
+                await _supabase.from('productos').insert([{ nombre, precio, categoria, user_id: userSession.user.id }]);
+            }
+            resetForm();
+            loadProducts();
+        }
+
+        function editForm(id) {
+            const p = productos.find(x => x.id === id);
+            document.getElementById('edit-id').value = p.id;
+            document.getElementById('p-nombre').value = p.nombre;
+            document.getElementById('p-precio').value = p.precio;
+            document.getElementById('p-cat').value = p.categoria;
+            document.getElementById('form-title').innerText = "EDITAR PRODUCTO";
+            document.getElementById('btn-cancel').style.display = "block";
+        }
+
+        function resetForm() {
+            document.getElementById('edit-id').value = "";
+            document.getElementById('p-nombre').value = "";
+            document.getElementById('p-precio').value = "";
+            document.getElementById('form-title').innerText = "AGREGAR PRODUCTO";
+            document.getElementById('btn-cancel').style.display = "none";
+        }
+
+        async function deleteProd(id) {
+            if(confirm("¿Eliminar producto?")) {
+                await _supabase.from('productos').delete().eq('id', id);
+                loadProducts();
+            }
+        }
+
+        // --- CARRITO Y VENTAS ---
         function addToCart(id) {
             const p = productos.find(x => x.id === id);
             const ex = carrito.find(x => x.id === id);
@@ -169,80 +235,82 @@
             let t = 0;
             lista.innerHTML = carrito.map(i => {
                 t += (i.precio * i.cant);
-                return `<div class="item-carrito"><span>${i.cant}x ${i.nombre}</span><span>$${(i.precio*i.cant).toFixed(2)}</span><button class="btn-del" onclick="removeFromCart(${i.id})">✕</button></div>`;
+                return `<div class="item-carrito"><span>${i.cant}x ${i.nombre}</span><span>$${(i.precio*i.cant).toFixed(2)}</span>
+                <button class="btn-del" onclick="removeFromCart(${i.id})">✕</button></div>`;
             }).join('');
             document.getElementById('total-pos').innerText = t.toFixed(2);
         }
 
-        function removeFromCart(id) { carrito = carrito.filter(x => x.id !== id); updateCartUI(); }
-
-        async function saveGasto() {
-            const concepto = document.getElementById('g-concepto').value;
-            const monto = document.getElementById('g-monto').value;
-            if(!concepto || !monto) return;
-            await _supabase.from('gastos').insert([{ concepto, monto, user_id: userSession.user.id }]);
-            document.getElementById('g-concepto').value = '';
-            document.getElementById('g-monto').value = '';
-            loadFinanzasHoy();
-        }
-
-        async function loadFinanzasHoy() {
-            const hoy = new Date().toISOString().split('T')[0];
-            
-            // Cargar Ventas
-            const { data: v } = await _supabase.from('ventas').select('total').gte('fecha', hoy);
-            totalVentasHoy = v ? v.reduce((acc, curr) => acc + parseFloat(curr.total), 0) : 0;
-
-            // Cargar Gastos
-            const { data: g } = await _supabase.from('gastos').select('*').gte('fecha', hoy);
-            totalGastosHoy = g ? g.reduce((acc, curr) => acc + parseFloat(curr.monto), 0) : 0;
-            
-            document.getElementById('c-ventas').innerText = `$${totalVentasHoy.toFixed(2)}`;
-            document.getElementById('c-gastos').innerText = `$${totalGastosHoy.toFixed(2)}`;
-            document.getElementById('c-neto').innerText = `$${(totalVentasHoy - totalGastosHoy).toFixed(2)}`;
-            
-            document.getElementById('lista-gastos-hoy').innerHTML = g ? g.map(i => `<tr><td>${i.concepto}</td><td>$${i.monto}</td></tr>`).join('') : '';
-        }
-
-        async function realizarCorteDía() {
-            if(!confirm("¿Deseas cerrar la caja de hoy? Esto guardará los totales en el historial.")) return;
-            
-            const balance = totalVentasHoy - totalGastosHoy;
-            const { error } = await _supabase.from('cortes_caja').insert([{
-                total_ventas: totalVentasHoy,
-                total_gastos: totalGastosHoy,
-                balance_final: balance,
-                user_id: userSession.user.id
-            }]);
-
-            if(!error) {
-                alert("¡Corte de caja guardado con éxito!");
-                loadHistorialCortes();
-            }
-        }
-
-        async function loadHistorialCortes() {
-            const { data } = await _supabase.from('cortes_caja').select('*').order('fecha', { ascending: false });
-            document.getElementById('lista-cortes-db').innerHTML = data ? data.map(c => `
-                <tr><td>${new Date(c.fecha).toLocaleDateString()}</td><td>$${c.total_ventas}</td><td>$${c.total_gastos}</td><td style="font-weight:bold">$${c.balance_final}</td></tr>
-            `).join('') : '';
+        function removeFromCart(id) {
+            carrito = carrito.filter(x => x.id !== id);
+            updateCartUI();
         }
 
         async function finalizarVenta() {
-            const t = document.getElementById('total-pos').innerText;
-            const d = carrito.map(i => `${i.cant}x ${i.nombre}`).join(', ');
-            await _supabase.from('ventas').insert([{ total: t, detalles: d, user_id: userSession.user.id }]);
-            imprimirTicket(t);
-            carrito = []; updateCartUI(); loadFinanzasHoy();
+            if(carrito.length === 0) return;
+            const total = document.getElementById('total-pos').innerText;
+            const detalles = carrito.map(i => `${i.cant}x ${i.nombre}`).join(', ');
+            
+            const { error } = await _supabase.from('ventas').insert([{ total, detalles, user_id: userSession.user.id }]);
+            if(!error) {
+                imprimirTicket(total);
+                carrito = [];
+                updateCartUI();
+                loadFinanzas();
+            }
         }
 
+        // --- FINANZAS, GASTOS Y CORTE ---
+        async function saveGasto() {
+            const concepto = document.getElementById('g-concepto').value;
+            const monto = document.getElementById('g-monto').value;
+            await _supabase.from('gastos').insert([{ concepto, monto, user_id: userSession.user.id }]);
+            document.getElementById('g-concepto').value = "";
+            document.getElementById('g-monto').value = "";
+            loadFinanzas();
+        }
+
+        async function loadFinanzas() {
+            const hoy = new Date().toISOString().split('T')[0];
+            const { data: v } = await _supabase.from('ventas').select('total').gte('fecha', hoy);
+            const { data: g } = await _supabase.from('gastos').select('*').gte('fecha', hoy);
+            
+            vHoy = v ? v.reduce((a, b) => a + parseFloat(b.total), 0) : 0;
+            gHoy = g ? g.reduce((a, b) => a + parseFloat(b.monto), 0) : 0;
+            
+            document.getElementById('c-ventas').innerText = `$${vHoy.toFixed(2)}`;
+            document.getElementById('c-gastos').innerText = `$${gHoy.toFixed(2)}`;
+            document.getElementById('c-neto').innerText = `$${(vHoy - gHoy).toFixed(2)}`;
+            
+            document.getElementById('lista-gastos-db').innerHTML = g ? g.map(i => `<tr><td>${new Date(i.fecha).toLocaleTimeString()}</td><td>${i.concepto}</td><td>$${i.monto}</td></tr>`).join('') : '';
+        }
+
+        async function realizarCorte() {
+            if(!confirm("¿Cerrar caja ahora?")) return;
+            const neto = vHoy - gHoy;
+            const { error } = await _supabase.from('cortes_caja').insert([{
+                total_ventas: vHoy, total_gastos: gHoy, balance_final: neto, user_id: userSession.user.id
+            }]);
+            if(!error) { alert("Corte guardado."); loadCortes(); }
+        }
+
+        async function loadCortes() {
+            const { data } = await _supabase.from('cortes_caja').select('*').order('fecha', { ascending: false });
+            document.getElementById('lista-cortes-db').innerHTML = data ? data.map(c => `<tr><td>${new Date(c.fecha).toLocaleDateString()}</td><td>$${c.total_ventas}</td><td>$${c.total_gastos}</td><td>$${c.balance_final}</td></tr>`).join('') : '';
+        }
+
+        // --- IMPRESIÓN ---
         function imprimirTicket(total) {
             const win = window.open('', '', 'width=300');
-            if(!win) return alert("Habilita los pop-ups");
-            win.document.write(`<html><body style="font-family:monospace;width:58mm;font-size:12px;">
-                <div style="text-align:center"><strong>BODO BIRRIA</strong><br>${new Date().toLocaleString()}</div>
-                <hr>${carrito.map(i=>`<div>${i.cant}x ${i.nombre} $${(i.precio*i.cant).toFixed(2)}</div>`).join('')}<hr>
-                <div style="text-align:right"><strong>TOTAL: $${total}</strong></div>
+            const agrupar = (cat) => carrito.filter(i => i.categoria === cat);
+            const seccion = (n, items) => items.length > 0 ? `<div style="text-align:center">-- ${n.toUpperCase()} --</div>` + items.map(i => `<div style="display:flex;justify-content:space-between"><span>${i.cant}x ${i.nombre}</span><span>$${(i.precio*i.cant).toFixed(2)}</span></div>`).join('') : "";
+
+            win.document.write(`<html><body style="font-family:monospace;width:58mm;font-size:12px;padding:5px;">
+                <div style="text-align:center"><strong>BODO BIRRIA</strong><br>${new Date().toLocaleString()}</div><hr>
+                ${seccion('plancha', agrupar('plancha'))}
+                ${seccion('bebidas', agrupar('bebidas'))}
+                ${seccion('freidora', agrupar('freidora'))}
+                <hr><div style="text-align:right"><strong>TOTAL: $${total}</strong></div>
                 <script>window.onload=function(){window.print();window.close();}<\/script></body></html>`);
             win.document.close();
         }

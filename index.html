@@ -2,80 +2,151 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wings House</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>POS Master Cloud - BODOBirria</title>
     <!-- Librería de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
-        :root { --bg: #0d1117; --panel: #161b22; --accent: #39d353; --text: #f0f6fc; }
-        body { background: var(--bg); color: var(--text); font-family: system-ui; margin: 0; }
+        :root {
+            --bg: #0a0a0a; --panel: #151515; --text: #ffffff;
+            --accent: #ffeb3b; --bebidas: #00e5ff; --plancha: #ff5722;
+            --freidora: #ffeb3b; --danger: #ff4444; --success: #4caf50;
+        }
+
+        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; }
         
-        /* Login simple */
-        #auth-view { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
-        .login-card { background: var(--panel); padding: 2rem; border-radius: 12px; border: 1px solid #30363d; width: 300px; }
+        /* Pantalla de Login con tu estilo */
+        #auth-view { display: flex; justify-content: center; align-items: center; height: 100vh; background: #000; }
+        .login-box { background: var(--panel); padding: 30px; border-radius: 15px; border: 2px solid var(--accent); width: 320px; text-align: center; box-shadow: 0 0 20px rgba(255,235,59,0.2); }
+
+        /* App Principal (Oculta al inicio) */
+        #app-view { display: none; }
+
+        .tabs { display: flex; background: #111; border-bottom: 2px solid #fff; position: sticky; top: 0; z-index: 100; }
+        .tab-btn { flex: 1; padding: 15px; border: none; background: none; color: #888; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        .tab-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
+
+        .tab-content { display: none; padding: 20px; animation: fadeIn 0.3s; }
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .panel { background: var(--panel); border: 2px solid #fff; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; box-shadow: 5px 5px 0px #000; margin-bottom: 15px; }
         
-        /* App */
-        #app-view { display: none; padding: 20px; }
-        .nav { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
-        .btn { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; }
-        .btn-primary { background: var(--accent); color: #000; }
-        .btn-outline { background: transparent; border: 1px solid #30363d; color: var(--text); }
+        input, select, button { padding: 10px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #444; background: #222; color: #fff; width: 100%; box-sizing: border-box; }
         
-        .grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
-        .panel { background: var(--panel); border: 1px solid #30363d; border-radius: 12px; padding: 15px; }
+        /* Botones y Tablas */
+        .btn-main { background: var(--success); border: none; font-weight: bold; cursor: pointer; color: white; }
+        .btn-logout { background: var(--danger); border: none; color: white; padding: 5px 15px; border-radius: 5px; cursor: pointer; width: auto; font-size: 0.8rem; }
         
-        input, select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: white; box-sizing: border-box; }
-        .menu-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
-        .item-card { background: #21262d; padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; border: 1px solid #30363d; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
+        th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+        th { background: #222; color: var(--accent); }
+
+        /* Layouts de tu código original */
+        .grid-pos { display: grid; grid-template-columns: 320px 1fr 320px; gap: 15px; }
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; overflow-y: auto; max-height: 70vh; }
+        .card { background: #222; border: 2px solid #fff; border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .card:active { transform: scale(0.95); background: #333; }
+        
+        .item-carrito { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #333; }
+        .btn-remove { background: var(--danger); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; width: auto; }
+
+        @media (max-width: 1000px) { .grid-pos { grid-template-columns: 1fr; } }
+
+        @media print { 
+            .no-print { display: none !important; } 
+            .comanda-print { width: 58mm; font-family: monospace; color: black; padding: 5mm; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- VISTA LOGIN -->
+    <!-- VISTA DE ACCESO -->
     <div id="auth-view">
-        <div class="login-card">
-            <h2>Wings House</h2>
-            <input type="email" id="email" placeholder="Correo">
+        <div class="login-box">
+            <h1 style="color: var(--accent); margin-top: 0;">BODO POS</h1>
+            <p>Accede a tu nube</p>
+            <input type="email" id="email" placeholder="Correo electrónico">
             <input type="password" id="pass" placeholder="Contraseña">
-            <button class="btn btn-primary" style="width: 100%" onclick="signIn()">ENTRAR / REGISTRARSE</button>
-            <p style="font-size: 12px; text-align: center; color: #8b949e">Tus datos se guardarán gratis en la nube.</p>
+            <button class="btn-main" onclick="handleAuth()">INGRESAR / REGISTRARSE</button>
+            <p style="font-size: 0.7rem; color: #666;">Se sincronizará con todos tus dispositivos.</p>
         </div>
     </div>
 
-    <!-- VISTA APP -->
+    <!-- VISTA DE LA APLICACIÓN -->
     <div id="app-view">
-        <div class="nav">
-            <h3 id="user-display" style="margin: 0; flex: 1;">Hola!</h3>
-            <button class="btn btn-outline" onclick="signOut()">Cerrar Sesión</button>
+        <div style="background: #111; padding: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <span id="user-info" style="font-size: 0.8rem; color: var(--accent);"></span>
+            <button class="btn-logout" onclick="signOut()">Cerrar Sesión</button>
         </div>
 
-        <div class="grid">
-            <div class="panel">
-                <h4>Añadir Producto</h4>
-                <input type="text" id="prod-nombre" placeholder="Nombre (ej. Birria)">
-                <input type="number" id="prod-precio" placeholder="Precio $">
-                <select id="prod-cat">
-                    <option value="plancha">Plancha</option>
-                    <option value="bebida">Bebida</option>
-                </select>
-                <button class="btn btn-primary" style="width: 100%" onclick="saveProduct()">Subir a la Nube</button>
-            </div>
+        <nav class="tabs no-print">
+            <button class="tab-btn active" onclick="openTab('pos')">🛒 Ventas</button>
+            <button class="tab-btn" onclick="openTab('inventario')">📦 Inventario / Menú</button>
+        </nav>
 
-            <div class="panel">
-                <h4>Menú Sincronizado</h4>
-                <div id="menu-grid" class="menu-items"></div>
+        <!-- SECCIÓN VENTAS -->
+        <div id="pos" class="tab-content active">
+            <div class="grid-pos no-print">
+                <div class="panel">
+                    <h3>Menú de Ventas</h3>
+                    <p style="font-size: 0.8rem; color: #888;">Toca un producto para agregar al carrito.</p>
+                    <div id="grid-venta" class="menu-grid">
+                        <!-- Se carga de Supabase -->
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2>Pedido Actual</h2>
+                    <div id="carrito-lista" style="flex:1; overflow-y:auto; min-height: 200px;"></div>
+                    <hr>
+                    <h2 style="text-align:right">Total: $<span id="total-pos">0.00</span></h2>
+                    <button class="btn-main" style="padding:20px; font-size:1.2rem" onclick="finalizarVenta()">IMPRIMIR TICKET</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN GESTIÓN -->
+        <div id="inventario" class="tab-content">
+            <div class="grid-pos">
+                <div class="panel">
+                    <h3>Nuevo Producto</h3>
+                    <input type="text" id="p-nombre" placeholder="Nombre (ej. Quesabirria)">
+                    <input type="number" id="p-precio" placeholder="Precio $">
+                    <select id="p-cat">
+                        <option value="plancha">Plancha</option>
+                        <option value="bebidas">Bebidas</option>
+                        <option value="freidora">Freidora</option>
+                    </select>
+                    <button class="btn-main" onclick="saveProduct()">Subir a la Nube</button>
+                </div>
+
+                <div class="panel" style="grid-column: span 2;">
+                    <h3>Productos en la Nube</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Nombre</th><th>Precio</th><th>Categoría</th><th>Acción</th></tr>
+                        </thead>
+                        <tbody id="tabla-gestion-nube"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
+
+    <div id="ticket-print" class="only-print"></div>
 
     <script>
         // --- CONFIGURACIÓN DE SUPABASE ---
-        const SUPABASE_URL = 'https://twqscsjdhklectswcjml.supabase.co';
+        const SUPABASE_URL = 'https://twqscsjdhklectswcjml.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3cXNjc2pkaGtsZWN0c3djam1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0Njc4OTAsImV4cCI6MjA5MzA0Mzg5MH0.8zz26TNZ26FUdFNYv0ao7kon79LBRbnzF_1MBbzttZk';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let userSession = null;
+        let productos = [];
+        let carrito = [];
 
         // 1. GESTIÓN DE SESIÓN
         _supabase.auth.onAuthStateChange((event, session) => {
@@ -83,7 +154,7 @@
             if (session) {
                 document.getElementById('auth-view').style.display = 'none';
                 document.getElementById('app-view').style.display = 'block';
-                document.getElementById('user-display').innerText = `Negocio: ${session.user.email}`;
+                document.getElementById('user-info').innerText = `Sesión: ${session.user.email}`;
                 loadProducts();
             } else {
                 document.getElementById('auth-view').style.display = 'flex';
@@ -91,39 +162,35 @@
             }
         });
 
-        async function signIn() {
+        async function handleAuth() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('pass').value;
-            // Intenta entrar, si falla intenta registrar (proceso automático)
             const { error } = await _supabase.auth.signInWithPassword({ email, password });
             if (error) {
                 const { error: signUpError } = await _supabase.auth.signUp({ email, password });
                 if (signUpError) alert("Error: " + signUpError.message);
-                else alert("¡Cuenta creada! Revisa tu email para confirmar (o entra directo si desactivaste confirmación)");
+                else alert("¡Usuario registrado! Si no desactivaste la confirmación, revisa tu correo.");
             }
         }
 
         async function signOut() { await _supabase.auth.signOut(); }
 
-        // 2. GESTIÓN DE PRODUCTOS (NUBE)
+        // 2. LOGICA DE PRODUCTOS
         async function saveProduct() {
-            const name = document.getElementById('prod-nombre').value;
-            const price = document.getElementById('prod-precio').value;
-            const cat = document.getElementById('prod-cat').value;
+            const n = document.getElementById('p-nombre').value;
+            const p = parseFloat(document.getElementById('p-precio').value);
+            const c = document.getElementById('p-cat').value;
+            
+            if(!n || isNaN(p)) return;
 
-            const { error } = await _supabase
-                .from('productos')
-                .insert([{ 
-                    nombre: name, 
-                    precio: parseFloat(price), 
-                    categoria: cat,
-                    user_id: userSession.user.id 
-                }]);
+            const { error } = await _supabase.from('productos').insert([{
+                nombre: n, precio: p, categoria: c, user_id: userSession.user.id
+            }]);
 
-            if (error) alert("Error al subir: " + error.message);
+            if (error) alert("Error: " + error.message);
             else {
-                document.getElementById('prod-nombre').value = '';
-                document.getElementById('prod-precio').value = '';
+                document.getElementById('p-nombre').value = "";
+                document.getElementById('p-precio').value = "";
                 loadProducts();
             }
         }
@@ -135,16 +202,77 @@
                 .order('nombre', { ascending: true });
 
             if (data) {
-                const grid = document.getElementById('menu-grid');
-                grid.innerHTML = '';
-                data.forEach(p => {
-                    grid.innerHTML += `
-                        <div class="item-card">
-                            <strong>${p.nombre}</strong><br>
-                            $${p.precio}
-                        </div>`;
-                });
+                productos = data;
+                renderApp();
             }
+        }
+
+        async function deleteProduct(id) {
+            if(confirm("¿Eliminar este producto de la nube?")) {
+                await _supabase.from('productos').delete().eq('id', id);
+                loadProducts();
+            }
+        }
+
+        // 3. RENDERIZADO CON TU ESTILO ORIGINAL
+        function renderApp() {
+            // Renderizar Grid de Venta
+            const grid = document.getElementById('grid-venta');
+            grid.innerHTML = "";
+            productos.forEach(prod => {
+                const d = document.createElement('div');
+                d.className = 'card';
+                d.style.borderColor = `var(--${prod.categoria})`;
+                d.innerHTML = `${prod.nombre}<br>$${prod.precio}`;
+                d.onclick = () => {
+                    const existe = carrito.find(i => i.id === prod.id);
+                    if(existe) existe.cant++; else carrito.push({...prod, cant: 1});
+                    actualizarCarrito();
+                };
+                grid.appendChild(d);
+            });
+
+            // Renderizar Tabla de Gestión
+            const tabla = document.getElementById('tabla-gestion-nube');
+            tabla.innerHTML = "";
+            productos.forEach(prod => {
+                tabla.innerHTML += `
+                    <tr>
+                        <td>${prod.nombre}</td>
+                        <td>$${prod.precio}</td>
+                        <td>${prod.categoria}</td>
+                        <td><button class="btn-remove" onclick="deleteProduct(${prod.id})">✕</button></td>
+                    </tr>`;
+            });
+        }
+
+        function actualizarCarrito() {
+            const lista = document.getElementById('carrito-lista');
+            lista.innerHTML = "";
+            let total = 0;
+            carrito.forEach(item => {
+                total += (item.precio * item.cant);
+                lista.innerHTML += `
+                    <div class="item-carrito">
+                        <span><b>${item.cant}</b> x ${item.nombre}</span>
+                        <span>$${(item.precio * item.cant).toFixed(2)}</span>
+                        <button class="btn-remove" onclick="carrito = carrito.filter(i => i.id !== ${item.id}); actualizarCarrito();">✕</button>
+                    </div>`;
+            });
+            document.getElementById('total-pos').innerText = total.toFixed(2);
+        }
+
+        function openTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function finalizarVenta() {
+            if(carrito.length === 0) return;
+            alert("Venta realizada. (Aquí puedes añadir la lógica de imprimir ticket térmica)");
+            carrito = [];
+            actualizarCarrito();
         }
     </script>
 </body>

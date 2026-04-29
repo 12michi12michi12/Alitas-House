@@ -9,59 +9,176 @@
     
     <style>
         :root {
-            --bg: #0a0a0a; --panel: #151515; --text: #ffffff;
-            --accent: #ffeb3b; --bebidas: #00e5ff; --plancha: #ff5722;
-            --freidora: #ffeb3b; --danger: #ff4444; --success: #4caf50;
+            --bg: #0a0a0a; 
+            --panel: #151515; 
+            --text: #ffffff;
+            --accent: #ffeb3b; 
+            --bebidas: #00e5ff; 
+            --plancha: #ff5722;
+            --freidora: #ffeb3b; 
+            --danger: #ff4444; 
+            --success: #4caf50;
         }
 
-        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; }
+        body { 
+            background-color: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            overflow-x: hidden;
+        }
         
         /* Pantalla de Login */
-        #auth-view { display: flex; justify-content: center; align-items: center; height: 100vh; background: #000; }
-        .login-box { background: var(--panel); padding: 30px; border-radius: 15px; border: 2px solid var(--accent); width: 320px; text-align: center; box-shadow: 0 0 20px rgba(255,235,59,0.2); }
+        #auth-view { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            background: #000; 
+        }
+        .login-box { 
+            background: var(--panel); 
+            padding: 30px; 
+            border-radius: 15px; 
+            border: 2px solid var(--accent); 
+            width: 320px; 
+            text-align: center; 
+            box-shadow: 0 0 20px rgba(255,235,59,0.2); 
+        }
 
         /* App Principal */
         #app-view { display: none; }
 
-        .tabs { display: flex; background: #111; border-bottom: 2px solid #fff; position: sticky; top: 0; z-index: 100; }
-        .tab-btn { flex: 1; padding: 15px; border: none; background: none; color: #888; cursor: pointer; font-weight: bold; text-transform: uppercase; }
-        .tab-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); background: rgba(255,235,59,0.1); }
+        .tabs { 
+            display: flex; 
+            background: #111; 
+            border-bottom: 2px solid #fff; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+        }
+        .tab-btn { 
+            flex: 1; 
+            padding: 15px; 
+            border: none; 
+            background: none; 
+            color: #888; 
+            cursor: pointer; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            transition: 0.3s;
+        }
+        .tab-btn.active { 
+            color: var(--accent); 
+            border-bottom: 3px solid var(--accent); 
+            background: rgba(255,235,59,0.1);
+        }
 
         .tab-content { display: none; padding: 20px; animation: fadeIn 0.3s; }
         .tab-content.active { display: block; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .panel { background: var(--panel); border: 2px solid #fff; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; box-shadow: 5px 5px 0px #000; margin-bottom: 15px; }
+        /* Paneles con tu estilo original */
+        .panel { 
+            background: var(--panel); 
+            border: 2px solid #fff; 
+            border-radius: 15px; 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            box-shadow: 5px 5px 0px #000; 
+            margin-bottom: 15px; 
+        }
         
-        input, select, button { padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #444; background: #222; color: #fff; width: 100%; box-sizing: border-box; font-size: 1rem; }
+        input, select, button { 
+            padding: 12px; 
+            margin-bottom: 10px; 
+            border-radius: 8px; 
+            border: 1px solid #444; 
+            background: #222; 
+            color: #fff; 
+            width: 100%; 
+            box-sizing: border-box; 
+            font-size: 1rem;
+        }
         
-        .btn-main { background: var(--success); border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; }
-        .btn-logout { background: var(--danger); border: none; color: white; padding: 5px 15px; border-radius: 5px; cursor: pointer; width: auto; font-size: 0.8rem; }
+        .btn-main { 
+            background: var(--success); 
+            border: none; 
+            font-weight: bold; 
+            cursor: pointer; 
+            color: white; 
+            text-transform: uppercase;
+        }
+        .btn-main:active { transform: scale(0.98); }
+
+        .btn-logout { 
+            background: var(--danger); 
+            border: none; 
+            color: white; 
+            padding: 5px 15px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            width: auto; 
+            font-size: 0.8rem; 
+        }
         
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
         th, td { border: 1px solid #333; padding: 10px; text-align: left; }
         th { background: #222; color: var(--accent); text-transform: uppercase; }
 
-        /* Layouts de Venta */
-        .grid-pos { display: grid; grid-template-columns: 1fr 350px; gap: 20px; align-items: start; }
-        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; overflow-y: auto; max-height: 75vh; padding: 5px; }
+        /* Grid de Ventas */
+        .grid-pos { display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
+        .menu-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
+            gap: 15px; 
+            overflow-y: auto; 
+            max-height: 70vh; 
+        }
         
         /* Tus Tarjetas de Producto */
         .card { 
-            background: #222; border: 2px solid #fff; border-radius: 12px; padding: 15px; 
-            text-align: center; cursor: pointer; font-weight: bold; transition: 0.2s; 
-            box-shadow: 3px 3px 0px #000; min-height: 80px; display: flex; flex-direction: column; justify-content: center;
+            background: #222; 
+            border: 2px solid #fff; 
+            border-radius: 12px; 
+            padding: 15px; 
+            text-align: center; 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: 0.2s; 
+            box-shadow: 3px 3px 0px #000;
+            min-height: 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
-        .card:active { transform: scale(0.95); background: #333; }
+        .card:active { transform: scale(0.92); background: #333; }
         
-        .item-carrito { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #333; }
-        .btn-remove { background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; width: auto; font-weight: bold; }
+        /* Colores de bordes por categoría */
+        .card.plancha { border-color: var(--plancha); }
+        .card.bebidas { border-color: var(--bebidas); }
+        .card.freidora { border-color: var(--freidora); }
 
-        /* Estilos de categoría (Bordes de colores) */
-        .border-plancha { border-color: var(--plancha) !important; }
-        .border-bebidas { border-color: var(--bebidas) !important; }
-        .border-freidora { border-color: var(--freidora) !important; }
+        .item-carrito { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 12px 0; 
+            border-bottom: 1px solid #333; 
+        }
+        .btn-remove { 
+            background: var(--danger); 
+            color: white; 
+            border: none; 
+            padding: 5px 10px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            width: auto; 
+            font-weight: bold;
+        }
 
         @media (max-width: 1000px) { 
             .grid-pos { grid-template-columns: 1fr; } 
@@ -71,88 +188,72 @@
 </head>
 <body>
 
-    <!-- VISTA DE ACCESO -->
     <div id="auth-view">
         <div class="login-box">
-            <h1 style="color: var(--accent); margin-bottom: 5px;">BODO POS</h1>
-            <p style="margin-bottom: 20px; opacity: 0.8;">Acceso a la Nube</p>
-            <input type="email" id="email" placeholder="Correo electrónico">
+            <h1 style="color: var(--accent); margin: 0; font-size: 2.2rem;">BODO POS</h1>
+            <p style="margin-bottom: 20px; opacity: 0.7;">Cloud System</p>
+            <input type="email" id="email" placeholder="Usuario (Email)">
             <input type="password" id="pass" placeholder="Contraseña">
-            <button class="btn-main" style="padding: 15px;" onclick="handleAuth()">INGRESAR AL SISTEMA</button>
-            <p style="font-size: 0.7rem; color: #666; margin-top: 15px;">Sincronización automática activa.</p>
+            <button class="btn-main" style="padding: 15px;" onclick="handleAuth()">ENTRAR</button>
         </div>
     </div>
 
-    <!-- VISTA DE LA APLICACIÓN -->
     <div id="app-view">
         <div style="background: #111; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333;">
-            <span id="user-info" style="font-size: 0.8rem; color: var(--accent); font-weight: bold;"></span>
+            <span id="user-info" style="font-size: 0.85rem; color: var(--accent); font-weight: bold;"></span>
             <button class="btn-logout" onclick="signOut()">CERRAR SESIÓN</button>
         </div>
 
-        <nav class="tabs no-print">
-            <button class="tab-btn active" onclick="openTab('pos')">🛒 VENTAS</button>
-            <button class="tab-btn" onclick="openTab('inventario')">📦 MI MENÚ</button>
+        <nav class="tabs">
+            <button id="btn-pos" class="tab-btn active" onclick="openTab('pos')">🛒 VENTAS</button>
+            <button id="btn-inv" class="tab-btn" onclick="openTab('inventario')">📦 MI MENÚ</button>
         </nav>
 
-        <!-- SECCIÓN VENTAS -->
         <div id="pos" class="tab-content active">
-            <div class="grid-pos no-print">
+            <div class="grid-pos">
                 <div class="panel">
-                    <h3 style="margin-top:0; color: var(--accent)">PRODUCTOS DISPONIBLES</h3>
-                    <div id="grid-venta" class="menu-grid">
-                        <!-- Cargando productos... -->
-                    </div>
+                    <h3 style="color: var(--accent); margin-top: 0;">MENÚ</h3>
+                    <div id="grid-venta" class="menu-grid"></div>
                 </div>
 
                 <div class="panel">
-                    <h2 style="margin-top:0">PEDIDO ACTUAL</h2>
-                    <div id="carrito-lista" style="flex:1; overflow-y:auto; min-height: 300px; margin-bottom: 15px;">
-                        <p style="color: #666; text-align: center;">El carrito está vacío</p>
-                    </div>
-                    <div style="background: #000; padding: 15px; border-radius: 10px; border: 1px solid #333;">
-                        <h2 style="text-align:right; margin:0; color: var(--accent)">TOTAL: $<span id="total-pos">0.00</span></h2>
-                    </div>
-                    <button class="btn-main" style="padding:20px; font-size:1.2rem; margin-top: 15px;" onclick="finalizarVenta()">COBRAR E IMPRIMIR</button>
+                    <h3 style="margin-top: 0;">ORDEN</h3>
+                    <div id="carrito-lista" style="flex:1; overflow-y:auto; min-height: 250px;"></div>
+                    <hr style="border-color: #333;">
+                    <h2 style="text-align:right; color: var(--accent); margin: 10px 0;">TOTAL: $<span id="total-pos">0.00</span></h2>
+                    <button class="btn-main" style="padding:20px; font-size:1.2rem" onclick="finalizarVenta()">IMPRIMIR TICKET</button>
                 </div>
             </div>
         </div>
 
-        <!-- SECCIÓN GESTIÓN -->
         <div id="inventario" class="tab-content">
             <div class="grid-pos">
                 <div class="panel">
-                    <h3>AGREGAR NUEVO PRODUCTO</h3>
-                    <label>Nombre:</label>
-                    <input type="text" id="p-nombre" placeholder="Ej. Quesabirria con Consomé">
-                    <label>Precio ($):</label>
-                    <input type="number" id="p-precio" placeholder="0.00">
-                    <label>Categoría:</label>
+                    <h3>NUEVO PRODUCTO</h3>
+                    <input type="text" id="p-nombre" placeholder="Nombre">
+                    <input type="number" id="p-precio" placeholder="Precio $">
                     <select id="p-cat">
-                        <option value="plancha">Plancha / Comida</option>
+                        <option value="plancha">Plancha</option>
                         <option value="bebidas">Bebidas</option>
-                        <option value="freidora">Freidora / Otros</option>
+                        <option value="freidora">Freidora</option>
                     </select>
-                    <button class="btn-main" style="background: var(--accent); color: #000;" onclick="saveProduct()">GUARDAR EN LA NUBE</button>
+                    <button class="btn-main" onclick="saveProduct()">GUARDAR EN NUBE</button>
                 </div>
 
                 <div class="panel">
-                    <h3>PRODUCTOS EN LA NUBE</h3>
-                    <div style="overflow-x: auto;">
-                        <table>
-                            <thead>
-                                <tr><th>Nombre</th><th>Precio</th><th>Cat.</th><th></th></tr>
-                            </thead>
-                            <tbody id="tabla-gestion-nube"></tbody>
-                        </table>
-                    </div>
+                    <h3>GESTIÓN</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Nombre</th><th>Precio</th><th>Categoría</th><th></th></tr>
+                        </thead>
+                        <tbody id="tabla-gestion-nube"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- TUS LLAVES CONFIGURADAS ---
         const SUPABASE_URL = 'https://twqscsjdhklectswcjml.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3cXNjc2pkaGtsZWN0c3djam1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0Njc4OTAsImV4cCI6MjA5MzA0Mzg5MH0.8zz26TNZ26FUdFNYv0ao7kon79LBRbnzF_1MBbzttZk';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -161,13 +262,12 @@
         let productos = [];
         let carrito = [];
 
-        // 1. GESTIÓN DE SESIÓN
         _supabase.auth.onAuthStateChange((event, session) => {
             userSession = session;
             if (session) {
                 document.getElementById('auth-view').style.display = 'none';
                 document.getElementById('app-view').style.display = 'block';
-                document.getElementById('user-info').innerText = `USUARIO: ${session.user.email}`;
+                document.getElementById('user-info').innerText = `BIENVENIDO: ${session.user.email}`;
                 loadProducts();
             } else {
                 document.getElementById('auth-view').style.display = 'flex';
@@ -178,32 +278,35 @@
         async function handleAuth() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('pass').value;
-            if(!email || !password) return alert("Completa los campos");
-
             const { error } = await _supabase.auth.signInWithPassword({ email, password });
             if (error) {
                 const { error: signUpError } = await _supabase.auth.signUp({ email, password });
                 if (signUpError) alert("Error: " + signUpError.message);
-                else alert("¡Registro exitoso! Por favor, revisa tu configuración de Supabase.");
+                else alert("Usuario creado. Revisa tu email o intenta entrar.");
             }
         }
 
         async function signOut() { await _supabase.auth.signOut(); }
 
-        // 2. LOGICA DE PRODUCTOS (NUBE)
         async function saveProduct() {
             const n = document.getElementById('p-nombre').value;
             const p = parseFloat(document.getElementById('p-precio').value);
             const c = document.getElementById('p-cat').value;
             
-            if(!n || isNaN(p)) return alert("Datos inválidos");
+            if(!n || isNaN(p)) return alert("Llena todos los campos");
 
+            // IMPORTANTE: Asegúrate de que tu tabla se llame 'productos' y tenga estas columnas
             const { error } = await _supabase.from('productos').insert([{
-                nombre: n, precio: p, categoria: c, user_id: userSession.user.id
+                nombre: n, 
+                precio: p, 
+                categoria: c, 
+                user_id: userSession.user.id
             }]);
 
-            if (error) alert("Error al guardar: " + error.message);
-            else {
+            if (error) {
+                console.error(error);
+                alert("Error al guardar: " + error.message);
+            } else {
                 document.getElementById('p-nombre').value = "";
                 document.getElementById('p-precio').value = "";
                 loadProducts();
@@ -223,90 +326,74 @@
         }
 
         async function deleteProduct(id) {
-            if(confirm("¿Seguro que quieres eliminar este producto?")) {
+            if(confirm("¿Eliminar producto?")) {
                 await _supabase.from('productos').delete().eq('id', id);
                 loadProducts();
             }
         }
 
-        // 3. RENDERIZADO VISUAL (TU DISEÑO)
         function renderApp() {
-            // Renderizar Grid de Ventas con colores
             const grid = document.getElementById('grid-venta');
             grid.innerHTML = "";
             productos.forEach(prod => {
                 const d = document.createElement('div');
-                d.className = `card border-${prod.categoria}`;
-                d.innerHTML = `<span style="font-size:0.9rem">${prod.nombre}</span><br>
-                               <span style="color:var(--accent); font-size:1.1rem">$${prod.precio}</span>`;
-                d.onclick = () => agregarAlCarrito(prod);
+                d.className = `card ${prod.categoria}`;
+                d.innerHTML = `<span>${prod.nombre}</span><br><span style="color:var(--accent)">$${prod.precio}</span>`;
+                d.onclick = () => {
+                    const item = carrito.find(i => i.id === prod.id);
+                    if(item) item.cant++; else carrito.push({...prod, cant: 1});
+                    actualizarCarrito();
+                };
                 grid.appendChild(d);
             });
 
-            // Renderizar Tabla de Gestión
             const tabla = document.getElementById('tabla-gestion-nube');
             tabla.innerHTML = "";
             productos.forEach(prod => {
                 tabla.innerHTML += `
                     <tr>
                         <td>${prod.nombre}</td>
-                        <td style="color:var(--accent)">$${prod.precio}</td>
+                        <td>$${prod.precio}</td>
                         <td>${prod.categoria}</td>
                         <td><button class="btn-remove" onclick="deleteProduct(${prod.id})">✕</button></td>
                     </tr>`;
             });
         }
 
-        // 4. FUNCIONES DEL CARRITO (TUS FUNCIONES)
-        function agregarAlCarrito(prod) {
-            const existe = carrito.find(i => i.id === prod.id);
-            if(existe) {
-                existe.cant++;
-            } else {
-                carrito.push({...prod, cant: 1});
-            }
-            actualizarCarritoUI();
-        }
-
-        function actualizarCarritoUI() {
+        function actualizarCarrito() {
             const lista = document.getElementById('carrito-lista');
             lista.innerHTML = "";
             let total = 0;
-
-            if(carrito.length === 0) {
-                lista.innerHTML = '<p style="color: #666; text-align: center;">El carrito está vacío</p>';
-            }
-
             carrito.forEach(item => {
-                const subtotal = item.precio * item.cant;
-                total += subtotal;
+                total += (item.precio * item.cant);
                 lista.innerHTML += `
                     <div class="item-carrito">
-                        <span><b style="color:var(--accent)">${item.cant}x</b> ${item.nombre}</span>
-                        <span>$${subtotal.toFixed(2)}</span>
-                        <button class="btn-remove" onclick="quitarDelCarrito(${item.id})">✕</button>
+                        <span><b>${item.cant}x</b> ${item.nombre}</span>
+                        <span>$${(item.precio * item.cant).toFixed(2)}</span>
+                        <button class="btn-remove" onclick="eliminarDelCarrito(${item.id})">✕</button>
                     </div>`;
             });
             document.getElementById('total-pos').innerText = total.toFixed(2);
         }
 
-        function quitarDelCarrito(id) {
+        function eliminarDelCarrito(id) {
             carrito = carrito.filter(i => i.id !== id);
-            actualizarCarritoUI();
+            actualizarCarrito();
         }
 
         function openTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            event.currentTarget.classList.add('active');
+            if(id === 'pos') document.getElementById('btn-pos').classList.add('active');
+            else document.getElementById('btn-inv').classList.add('active');
         }
 
         function finalizarVenta() {
-            if(carrito.length === 0) return alert("Agrega productos primero");
-            alert("¡Venta Exitosa! El total fue: $" + document.getElementById('total-pos').innerText);
+            if(carrito.length === 0) return alert("Carrito vacío");
+            alert("Ticket Generado con éxito");
             carrito = [];
-            actualizarCarritoUI();
+            actualizarCarrito();
         }
     </script>
 </body>

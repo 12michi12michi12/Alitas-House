@@ -3,122 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BODOBirria POS - Multi-Sección</title>
+    <title>BODO POS - Fixed</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root {
-            --bg: #0a0a0a; --panel: #151515; --text: #ffffff;
-            --accent: #ffeb3b; --bebidas: #00e5ff; --plancha: #ff5722;
-            --freidora: #ffeb3b; --danger: #ff4444; --success: #4caf50;
-        }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; overflow-x: hidden; }
-        
-        /* Ajuste Responsivo */
-        .container { display: flex; flex-direction: column; height: 100vh; }
-        #auth-view { display: flex; justify-content: center; align-items: center; height: 100vh; padding: 20px; }
-        .login-box { background: var(--panel); padding: 30px; border-radius: 15px; border: 2px solid var(--accent); width: 100%; max-width: 350px; text-align: center; }
-        
-        .tabs { display: flex; background: #111; border-bottom: 2px solid #fff; position: sticky; top: 0; z-index: 100; overflow-x: auto; }
-        .tab-btn { flex: 1; padding: 15px; border: none; background: none; color: #888; cursor: pointer; font-weight: bold; min-width: 100px; white-space: nowrap; }
-        .tab-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); background: rgba(255,235,59,0.1); }
-        
-        .tab-content { display: none; padding: 15px; box-sizing: border-box; }
+        :root { --bg: #0a0a0a; --panel: #151515; --accent: #ffeb3b; --text: #fff; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; padding-bottom: 50px; }
+        .panel { background: var(--panel); border: 2px solid #fff; border-radius: 12px; padding: 15px; margin: 10px; }
+        .tabs { display: flex; sticky; top: 0; background: #000; z-index: 10; border-bottom: 2px solid var(--accent); }
+        .tab-btn { flex: 1; padding: 15px; color: #888; background: none; border: none; font-weight: bold; font-size: 14px; }
+        .tab-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
+        .tab-content { display: none; padding: 10px; }
         .tab-content.active { display: block; }
-        
-        /* Grid de Ventas Responsivo */
-        .grid-pos { display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
-        @media (max-width: 900px) { .grid-pos { grid-template-columns: 1fr; } }
-        
-        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
-        .card { background: #222; border: 2px solid #fff; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; font-weight: bold; transition: transform 0.1s; -webkit-tap-highlight-color: transparent; }
-        .card:active { transform: scale(0.95); }
-        
-        .panel { background: var(--panel); border: 2px solid #fff; border-radius: 15px; padding: 15px; box-shadow: 4px 4px 0px #000; margin-bottom: 15px; }
-        input, select, button { padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #444; background: #222; color: #fff; width: 100%; box-sizing: border-box; font-size: 16px; }
-        
-        .btn-main { background: var(--success); border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; }
-        .btn-del { background: var(--danger); color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; width: auto; }
-        
-        /* Estilos de Tabla Responsiva */
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 400px; }
-        th, td { border: 1px solid #333; padding: 10px; text-align: left; }
+        input, select, button { width: 100%; padding: 12px; margin: 5px 0; border-radius: 8px; border: 1px solid #444; background: #222; color: #fff; font-size: 16px; }
+        .btn-main { background: #4caf50; border: none; font-weight: bold; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+        .card { background: #333; border: 1px solid #fff; padding: 15px; text-align: center; border-radius: 10px; font-weight: bold; }
+        .item-row { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #333; }
     </style>
 </head>
 <body>
 
-    <div id="auth-view">
-        <div class="login-box">
-            <h1 style="color: var(--accent);">BODO POS</h1>
-            <input type="email" id="email" placeholder="Email">
-            <input type="password" id="pass" placeholder="Password">
-            <button class="btn-main" onclick="handleAuth()">ENTRAR</button>
-        </div>
+    <div id="auth-view" style="padding: 40px 20px; text-align: center;">
+        <h2 style="color: var(--accent);">BODO POS LOGIN</h2>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="pass" placeholder="Contraseña">
+        <button class="btn-main" onclick="handleAuth()">INGRESAR</button>
     </div>
 
     <div id="app-view" style="display:none;">
-        <div style="background: #111; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333;">
-            <span id="user-info" style="color: var(--accent); font-size: 0.8rem; font-weight: bold;"></span>
-            <button onclick="signOut()" style="width:auto; background: var(--danger); padding: 5px 12px; border:none; border-radius:5px;">SALIR</button>
-        </div>
-
         <nav class="tabs">
-            <button class="tab-btn active" onclick="openTab('pos')">🛒 VENTAS</button>
-            <button class="tab-btn" onclick="openTab('inventario')">📦 MENÚ</button>
-            <button class="tab-btn" onclick="openTab('gastos')">💸 GASTOS</button>
-            <button class="tab-btn" onclick="openTab('finanzas')">📊 CORTE</button>
+            <button class="tab-btn active" onclick="openTab('pos')">VENTAS</button>
+            <button class="tab-btn" onclick="openTab('gastos')">GASTOS</button>
+            <button class="tab-btn" onclick="openTab('finanzas')">CORTE</button>
+            <button class="tab-btn" onclick="openTab('menu')">MENÚ</button>
         </nav>
 
+        <!-- VENTAS -->
         <div id="pos" class="tab-content active">
-            <div class="grid-pos">
-                <div class="panel">
-                    <div id="grid-venta" class="menu-grid"></div>
-                </div>
-                <div class="panel">
-                    <h3>PEDIDO</h3>
-                    <div id="carrito-lista"></div>
-                    <hr>
-                    <h2 style="text-align:right">TOTAL: $<span id="total-pos">0.00</span></h2>
-                    <button class="btn-main" style="padding: 20px; font-size: 1.2rem;" onclick="finalizarVenta()">COBRAR Y COMANDAS</button>
-                </div>
+            <div class="grid" id="grid-venta"></div>
+            <div class="panel">
+                <h3>PEDIDO ACTUAL</h3>
+                <div id="carrito-lista"></div>
+                <h2>TOTAL: $<span id="total-pos">0.00</span></h2>
+                <button class="btn-main" onclick="finalizarVenta()" style="height: 60px;">COBRAR E IMPRIMIR</button>
             </div>
         </div>
 
-        <div id="inventario" class="tab-content">
+        <!-- GASTOS -->
+        <div id="gastos" class="tab-content">
             <div class="panel">
-                <h3 id="form-title">PRODUCTO</h3>
-                <input type="hidden" id="edit-id">
+                <h3>REGISTRAR GASTO</h3>
+                <input type="text" id="g-concepto" placeholder="¿En qué se gastó?">
+                <input type="number" id="g-monto" placeholder="Monto $">
+                <button class="btn-main" style="background: #ff5722;" onclick="saveGasto()">GUARDAR GASTO</button>
+            </div>
+            <div id="lista-gastos-hoy"></div>
+        </div>
+
+        <!-- FINANZAS / CORTE -->
+        <div id="finanzas" class="tab-content">
+            <div class="panel" style="text-align:center;">
+                <div style="display:flex; justify-content: space-around;">
+                    <div>Ventas: <br><strong id="res-ventas">$0</strong></div>
+                    <div>Gastos: <br><strong id="res-gastos">$0</strong></div>
+                </div>
+                <hr>
+                <button class="btn-main" style="background: var(--accent); color: #000;" onclick="realizarCorte()">REALIZAR CORTE DE CAJA</button>
+            </div>
+            <div id="historial-cortes"></div>
+        </div>
+
+        <!-- MENU (GESTIÓN) -->
+        <div id="menu" class="tab-content">
+            <div class="panel">
+                <h3>NUEVO PRODUCTO</h3>
                 <input type="text" id="p-nombre" placeholder="Nombre">
-                <input type="number" id="p-precio" placeholder="Precio $">
+                <input type="number" id="p-precio" placeholder="Precio">
                 <select id="p-cat">
                     <option value="plancha">Plancha</option>
                     <option value="bebidas">Bebidas</option>
                     <option value="freidora">Freidora</option>
                 </select>
-                <button class="btn-main" onclick="saveProduct()">GUARDAR</button>
-            </div>
-            <div class="panel table-wrapper">
-                <table id="lista-prod-db"></table>
-            </div>
-        </div>
-
-        <div id="gastos" class="tab-content">
-            <div class="panel">
-                <h3>GASTO</h3>
-                <input type="text" id="g-concepto" placeholder="Concepto">
-                <input type="number" id="g-monto" placeholder="Monto $">
-                <button class="btn-main" style="background: var(--plancha);" onclick="saveGasto()">GUARDAR GASTO</button>
-            </div>
-        </div>
-
-        <div id="finanzas" class="tab-content">
-            <div class="panel" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; text-align:center;">
-                <div><small>VENTAS</small><br><strong id="c-ventas" style="color:var(--success)">$0</strong></div>
-                <div><small>GASTOS</small><br><strong id="c-gastos" style="color:var(--danger)">$0</strong></div>
-            </div>
-            <button class="btn-main" style="background: var(--accent); color: #000;" onclick="realizarCorte()">CERRAR CAJA (CORTE)</button>
-            <div class="panel table-wrapper" style="margin-top:20px;">
-                <table id="lista-cortes-db"></table>
+                <button class="btn-main" onclick="saveProduct()">AÑADIR AL MENÚ</button>
             </div>
         </div>
     </div>
@@ -131,39 +97,36 @@
         let userSession = null;
         let productos = [];
         let carrito = [];
+        let ventasHoyTotal = 0;
+        let gastosHoyTotal = 0;
 
         _supabase.auth.onAuthStateChange((e, session) => {
-            userSession = session;
             if (session) {
+                userSession = session;
                 document.getElementById('auth-view').style.display = 'none';
                 document.getElementById('app-view').style.display = 'block';
-                document.getElementById('user-info').innerText = session.user.email;
-                loadInitialData();
+                loadAll();
             }
         });
 
         async function handleAuth() {
             const email = document.getElementById('email').value;
-            const password = document.getElementById('pass').value;
-            await _supabase.auth.signInWithPassword({ email, password });
+            const pass = document.getElementById('pass').value;
+            const { error } = await _supabase.auth.signInWithPassword({ email, password: pass });
+            if(error) alert("Error: " + error.message);
         }
 
-        async function signOut() { await _supabase.auth.signOut(); window.location.reload(); }
-
-        async function loadInitialData() {
-            const { data } = await _supabase.from('productos').select('*').order('nombre');
-            productos = data || [];
-            renderUI();
+        async function loadAll() {
+            const { data: p } = await _supabase.from('productos').select('*').order('nombre');
+            productos = p || [];
+            renderMenu();
             loadFinanzas();
         }
 
-        function renderUI() {
+        function renderMenu() {
             document.getElementById('grid-venta').innerHTML = productos.map(p => `
-                <div class="card" style="border-color: var(--${p.categoria})" onclick="addToCart(${p.id})">${p.nombre}<br>$${p.precio}</div>
+                <div class="card" onclick="addToCart(${p.id})">${p.nombre}<br>$${p.precio}</div>
             `).join('');
-            
-            document.getElementById('lista-prod-db').innerHTML = `<thead><tr><th>Producto</th><th>Precio</th><th>Acción</th></tr></thead><tbody>` + 
-            productos.map(p => `<tr><td>${p.nombre}</td><td>$${p.precio}</td><td><button class="btn-del" onclick="deleteProd(${p.id})">✕</button></td></tr>`).join('') + `</tbody>`;
         }
 
         function addToCart(id) {
@@ -177,97 +140,101 @@
             let t = 0;
             document.getElementById('carrito-lista').innerHTML = carrito.map(i => {
                 t += (i.precio * i.cant);
-                return `<div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                    <span>${i.cant}x ${i.nombre}</span>
-                    <span>$${(i.precio*i.cant).toFixed(2)} <button class="btn-del" onclick="removeFromCart(${i.id})">✕</button></span>
-                </div>`;
+                return `<div class="item-row"><span>${i.cant}x ${i.nombre}</span><span>$${(i.precio*i.cant)}</span></div>`;
             }).join('');
             document.getElementById('total-pos').innerText = t.toFixed(2);
         }
 
-        function removeFromCart(id) { carrito = carrito.filter(x => x.id !== id); updateCartUI(); }
-
-        async function finalizarVenta() {
-            if(carrito.length === 0) return;
-            const total = document.getElementById('total-pos').innerText;
-            const detalles = carrito.map(i => `${i.cant}x ${i.nombre}`).join(', ');
-            
-            const { error } = await _supabase.from('ventas').insert([{ total, detalles, user_id: userSession.user.id }]);
-            if(!error) {
-                imprimirComandasSeparadas();
-                carrito = [];
-                updateCartUI();
-                loadFinanzas();
-            }
-        }
-
-        // --- FUNCIÓN DE IMPRESIÓN TRIPLE ---
-        function imprimirComandasSeparadas() {
-            const categorias = ['plancha', 'bebidas', 'freidora'];
-            const ticketTotal = document.getElementById('total-pos').innerText;
-            const fecha = new Date().toLocaleString();
-
-            categorias.forEach(cat => {
-                const items = carrito.filter(i => i.categoria === cat);
-                if (items.length > 0) {
-                    const win = window.open('', '_blank', 'width=300,height=400');
-                    win.document.write(`
-                        <html><body style="font-family:monospace; width:58mm; padding:5px; font-size:12px;">
-                            <div style="text-align:center;"><strong>COMANDA: ${cat.toUpperCase()}</strong><br>${fecha}</div>
-                            <hr>
-                            ${items.map(i => `<div>${i.cant}x ${i.nombre}</div>`).join('')}
-                            <hr>
-                            <div style="text-align:center;">BODO BIRRIA</div>
-                            <script>window.onload=function(){ window.print(); window.close(); };<\/script>
-                        </body></html>
-                    `);
-                    win.document.close();
-                }
-            });
-
-            // Ticket para el cliente (Opcional)
-            const winCliente = window.open('', '_blank', 'width=300,height=400');
-            winCliente.document.write(`
-                <html><body style="font-family:monospace; width:58mm; padding:5px; font-size:12px;">
-                    <div style="text-align:center;"><strong>BODO BIRRIA</strong><br>Ticket Cliente<br>${fecha}</div>
-                    <hr>
-                    ${carrito.map(i => `<div style="display:flex; justify-content:space-between;"><span>${i.cant}x ${i.nombre}</span><span>$${(i.precio*i.cant).toFixed(2)}</span></div>`).join('')}
-                    <hr>
-                    <div style="text-align:right;"><strong>TOTAL: $${ticketTotal}</strong></div>
-                    <script>window.onload=function(){ window.print(); window.close(); };<\/script>
-                </body></html>
-            `);
-            winCliente.document.close();
-        }
-
-        // --- FUNCIONES EXTRA ---
-        async function saveProduct() {
-            const n = document.getElementById('p-nombre').value, p = document.getElementById('p-precio').value, c = document.getElementById('p-cat').value;
-            await _supabase.from('productos').insert([{ nombre: n, precio: p, categoria: c, user_id: userSession.user.id }]);
-            loadInitialData();
-        }
-
         async function saveGasto() {
-            const c = document.getElementById('g-concepto').value, m = document.getElementById('g-monto').value;
-            await _supabase.from('gastos').insert([{ concepto: c, monto: m, user_id: userSession.user.id }]);
-            loadFinanzas();
+            const concepto = document.getElementById('g-concepto').value;
+            const monto = document.getElementById('g-monto').value;
+            if(!concepto || !monto) return alert("Llena todos los campos");
+
+            const { error } = await _supabase.from('gastos').insert([{ 
+                concepto, 
+                monto: parseFloat(monto), 
+                user_id: userSession.user.id 
+            }]);
+
+            if(!error) {
+                alert("Gasto guardado correctamente");
+                document.getElementById('g-concepto').value = "";
+                document.getElementById('g-monto').value = "";
+                loadFinanzas();
+            } else {
+                alert("Error al guardar: " + error.message);
+            }
         }
 
         async function loadFinanzas() {
             const hoy = new Date().toISOString().split('T')[0];
             const { data: v } = await _supabase.from('ventas').select('total').gte('fecha', hoy);
             const { data: g } = await _supabase.from('gastos').select('monto').gte('fecha', hoy);
-            const tv = v ? v.reduce((a, b) => a + parseFloat(b.total), 0) : 0;
-            const tg = g ? g.reduce((a, b) => a + parseFloat(b.monto), 0) : 0;
-            document.getElementById('c-ventas').innerText = `$${tv.toFixed(2)}`;
-            document.getElementById('c-gastos').innerText = `$${tg.toFixed(2)}`;
+
+            ventasHoyTotal = v ? v.reduce((a, b) => a + parseFloat(b.total), 0) : 0;
+            gastosHoyTotal = g ? g.reduce((a, b) => a + parseFloat(b.monto), 0) : 0;
+
+            document.getElementById('res-ventas').innerText = `$${ventasHoyTotal.toFixed(2)}`;
+            document.getElementById('res-gastos').innerText = `$${gastosHoyTotal.toFixed(2)}`;
         }
 
         async function realizarCorte() {
-            const { data: v } = await _supabase.from('ventas').select('total'); // Simplificado para el ejemplo
-            const neto = v.reduce((a, b) => a + parseFloat(b.total), 0);
-            await _supabase.from('cortes_caja').insert([{ total_ventas: neto, total_gastos: 0, balance_final: neto, user_id: userSession.user.id }]);
-            alert("Corte realizado");
+            if(!confirm("¿Deseas cerrar la caja con los valores actuales?")) return;
+            
+            const balance = ventasHoyTotal - gastosHoyTotal;
+            const { error } = await _supabase.from('cortes_caja').insert([{
+                total_ventas: ventasHoyTotal,
+                total_gastos: gastosHoyTotal,
+                balance_final: balance,
+                user_id: userSession.user.id
+            }]);
+
+            if(!error) {
+                alert("CORTE REALIZADO CON ÉXITO");
+                loadFinanzas();
+            }
+        }
+
+        async function finalizarVenta() {
+            if(carrito.length === 0) return;
+            const total = document.getElementById('total-pos').innerText;
+            const detalles = carrito.map(i => `${i.cant}x ${i.nombre}`).join(', ');
+
+            const { error } = await _supabase.from('ventas').insert([{ 
+                total: parseFloat(total), 
+                detalles, 
+                user_id: userSession.user.id 
+            }]);
+
+            if(!error) {
+                imprimirTicketsLocales();
+                carrito = [];
+                updateCartUI();
+                loadFinanzas();
+            }
+        }
+
+        function imprimirTicketsLocales() {
+            const cats = ['plancha', 'bebidas', 'freidora'];
+            cats.forEach(c => {
+                const items = carrito.filter(i => i.categoria === c);
+                if(items.length > 0) {
+                    const t = window.open('', '_blank');
+                    t.document.write(`<html><body style="font-family:monospace;width:58mm;">
+                        <center><strong>BODO - ${c.toUpperCase()}</strong><br>${new Date().toLocaleTimeString()}</center><hr>
+                        ${items.map(i => `<div>${i.cant}x ${i.nombre}</div>`).join('')}
+                        <script>window.onload=function(){window.print();window.close();}<\/script></body></html>`);
+                    t.document.close();
+                }
+            });
+        }
+
+        async function saveProduct() {
+            const nombre = document.getElementById('p-nombre').value;
+            const precio = document.getElementById('p-precio').value;
+            const categoria = document.getElementById('p-cat').value;
+            await _supabase.from('productos').insert([{ nombre, precio, categoria, user_id: userSession.user.id }]);
+            loadAll();
         }
 
         function openTab(id) {

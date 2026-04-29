@@ -1,9 +1,9 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BODOBirria - POS Cloud Agrupado</title>
+    <title>BODOBirria - POS Cloud v4</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -13,16 +13,15 @@
         }
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; }
         #auth-view { display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .login-box { background: var(--panel); padding: 30px; border-radius: 15px; border: 2px solid var(--accent); width: 320px; text-align: center; box-shadow: 0 0 20px rgba(255,235,59,0.2); }
+        .login-box { background: var(--panel); padding: 30px; border-radius: 15px; border: 2px solid var(--accent); width: 320px; text-align: center; }
         #app-view { display: none; }
         .tabs { display: flex; background: #111; border-bottom: 2px solid #fff; position: sticky; top: 0; z-index: 100; }
-        .tab-btn { flex: 1; padding: 15px; border: none; background: none; color: #888; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        .tab-btn { flex: 1; padding: 15px; border: none; background: none; color: #888; cursor: pointer; font-weight: bold; }
         .tab-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); background: rgba(255,235,59,0.1); }
-        .tab-content { display: none; padding: 20px; animation: fadeIn 0.3s; }
+        .tab-content { display: none; padding: 20px; }
         .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .panel { background: var(--panel); border: 2px solid #fff; border-radius: 15px; padding: 15px; box-shadow: 5px 5px 0px #000; margin-bottom: 15px; }
-        input, select, button { padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #444; background: #222; color: #fff; width: 100%; box-sizing: border-box; font-size: 1rem; }
+        input, select, button { padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #444; background: #222; color: #fff; width: 100%; box-sizing: border-box; }
         .btn-main { background: var(--success); border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; }
         .grid-pos { display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
         .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
@@ -31,10 +30,8 @@
         .card.bebidas { border-color: var(--bebidas); }
         .card.freidora { border-color: var(--freidora); }
         .item-carrito { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #333; }
-        .btn-del { background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; width: auto; font-weight: bold; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .stat-card { background: #222; padding: 20px; border-radius: 10px; border: 1px solid var(--accent); text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .btn-del { background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; width: auto; }
+        table { width: 100%; border-collapse: collapse; }
         th, td { border: 1px solid #333; padding: 10px; text-align: left; }
         @media (max-width: 900px) { .grid-pos { grid-template-columns: 1fr; } }
     </style>
@@ -43,17 +40,17 @@
 
     <div id="auth-view">
         <div class="login-box">
-            <h1 style="color: var(--accent); margin-bottom: 10px;">BODO POS</h1>
-            <input type="email" id="email" placeholder="Usuario (Email)">
-            <input type="password" id="pass" placeholder="Contraseña">
-            <button class="btn-main" onclick="handleAuth()">ENTRAR AL SISTEMA</button>
+            <h1 style="color: var(--accent);">BODO POS</h1>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="pass" placeholder="Password">
+            <button class="btn-main" onclick="handleAuth()">ENTRAR</button>
         </div>
     </div>
 
     <div id="app-view">
         <div style="background: #111; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center;">
-            <span id="user-info" style="font-size: 0.8rem; color: var(--accent); font-weight: bold;"></span>
-            <button onclick="signOut()" style="width:auto; background: var(--danger); padding: 5px 15px;">SALIR</button>
+            <span id="user-info" style="color: var(--accent); font-weight: bold; font-size: 0.8rem;"></span>
+            <button onclick="signOut()" style="width:auto; background: var(--danger); padding: 5px 15px; border:none; border-radius:5px; cursor:pointer;">CERRAR SESIÓN</button>
         </div>
 
         <nav class="tabs">
@@ -65,49 +62,47 @@
         <div id="pos" class="tab-content active">
             <div class="grid-pos">
                 <div class="panel">
-                    <h3 style="color: var(--accent);">PRODUCTOS</h3>
+                    <h3>MENÚ</h3>
                     <div id="grid-venta" class="menu-grid"></div>
                 </div>
                 <div class="panel">
-                    <h3>PEDIDO ACTUAL</h3>
-                    <div id="carrito-lista" style="min-height: 250px; overflow-y: auto;"></div>
+                    <h3>PEDIDO</h3>
+                    <div id="carrito-lista" style="min-height: 200px;"></div>
                     <hr>
                     <h2 style="text-align:right">TOTAL: $<span id="total-pos">0.00</span></h2>
-                    <button class="btn-main" style="padding: 20px; font-size: 1.2rem;" onclick="finalizarVenta()">COBRAR E IMPRIMIR</button>
+                    <button class="btn-main" style="padding: 20px;" onclick="finalizarVenta()">COBRAR E IMPRIMIR</button>
                 </div>
             </div>
         </div>
 
         <div id="inventario" class="tab-content">
             <div class="panel">
-                <h3>NUEVO PRODUCTO</h3>
-                <input type="text" id="p-nombre" placeholder="Nombre">
+                <h3>AGREGAR AL MENÚ</h3>
+                <input type="text" id="p-nombre" placeholder="Producto">
                 <input type="number" id="p-precio" placeholder="Precio $">
                 <select id="p-cat">
                     <option value="plancha">Plancha</option>
                     <option value="bebidas">Bebidas</option>
                     <option value="freidora">Freidora</option>
                 </select>
-                <button class="btn-main" onclick="saveProduct()">GUARDAR EN NUBE</button>
+                <button class="btn-main" onclick="saveProduct()">GUARDAR</button>
             </div>
             <div class="panel">
-                <h3>PRODUCTOS REGISTRADOS</h3>
-                <table id="tabla-prod">
-                    <thead><tr><th>Nombre</th><th>Precio</th><th>Categoría</th><th>Eliminar</th></tr></thead>
+                <table>
+                    <thead><tr><th>Nombre</th><th>Precio</th><th>Acción</th></tr></thead>
                     <tbody id="lista-prod-db"></tbody>
                 </table>
             </div>
         </div>
 
         <div id="finanzas" class="tab-content">
-            <div class="stats-grid">
-                <div class="stat-card"><h3>HOY</h3><h2 id="v-hoy">$0.00</h2></div>
-                <div class="stat-card"><h3>MES</h3><h2 id="v-mes">$0.00</h2></div>
-                <div class="stat-card"><h3>AÑO</h3><h2 id="v-ano">$0.00</h2></div>
+            <div class="panel" style="display: flex; justify-content: space-around; text-align: center;">
+                <div><h4>HOY</h4><h2 id="v-hoy">$0</h2></div>
+                <div><h4>MES</h4><h2 id="v-mes">$0</h2></div>
             </div>
-            <div class="panel" style="margin-top:20px;">
-                <h3>HISTORIAL DE VENTAS (CORTE)</h3>
-                <table id="tabla-finanzas">
+            <div class="panel">
+                <h3>CORTE DIARIO</h3>
+                <table id="tabla-ventas">
                     <thead><tr><th>Fecha</th><th>Total</th><th>Detalles</th></tr></thead>
                     <tbody id="lista-ventas-db"></tbody>
                 </table>
@@ -124,52 +119,55 @@
         let productos = [];
         let carrito = [];
 
-        _supabase.auth.onAuthStateChange((e, session) => {
+        // LÓGICA DE SESIÓN
+        _supabase.auth.onAuthStateChange((event, session) => {
             userSession = session;
             if (session) {
                 document.getElementById('auth-view').style.display = 'none';
                 document.getElementById('app-view').style.display = 'block';
-                document.getElementById('user-info').innerText = `BIENVENIDO: ${session.user.email}`;
+                document.getElementById('user-info').innerText = session.user.email;
                 loadData();
+            } else {
+                document.getElementById('auth-view').style.display = 'flex';
+                document.getElementById('app-view').style.display = 'none';
             }
         });
 
         async function handleAuth() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('pass').value;
-            await _supabase.auth.signInWithPassword({ email, password });
+            const { error } = await _supabase.auth.signInWithPassword({ email, password });
+            if(error) alert("Error: " + error.message);
         }
 
-        async function signOut() { await _supabase.auth.signOut(); }
+        async function signOut() {
+            const { error } = await _supabase.auth.signOut();
+            if (error) alert("Error al cerrar sesión");
+            else window.location.reload(); // Recarga para limpiar todo el estado
+        }
 
+        // CARGA DE DATOS
         async function loadData() {
-            const { data: p } = await _supabase.from('productos').select('*').order('nombre');
-            productos = p || [];
+            const { data } = await _supabase.from('productos').select('*').order('nombre');
+            productos = data || [];
             renderUI();
             loadFinanzas();
         }
 
         function renderUI() {
             const grid = document.getElementById('grid-venta');
-            grid.innerHTML = productos.map(p => `
-                <div class="card ${p.categoria}" onclick="addToCart(${p.id})">${p.nombre}<br>$${p.precio}</div>
-            `).join('');
-
+            grid.innerHTML = productos.map(p => `<div class="card ${p.categoria}" onclick="addToCart(${p.id})">${p.nombre}<br>$${p.precio}</div>`).join('');
+            
             const lista = document.getElementById('lista-prod-db');
-            lista.innerHTML = productos.map(p => `
-                <tr><td>${p.nombre}</td><td>$${p.precio}</td><td>${p.categoria}</td>
-                <td><button class="btn-del" onclick="deleteProd(${p.id})">✕</button></td></tr>
-            `).join('');
+            lista.innerHTML = productos.map(p => `<tr><td>${p.nombre}</td><td>$${p.precio}</td><td><button class="btn-del" onclick="deleteProd(${p.id})">ELIMINAR</button></td></tr>`).join('');
         }
 
+        // CARRITO (AGRUPADO)
         function addToCart(id) {
-            const prod = productos.find(x => x.id === id);
-            const itemExistente = carrito.find(x => x.id === id);
-            if (itemExistente) {
-                itemExistente.cant++;
-            } else {
-                carrito.push({...prod, cant: 1});
-            }
+            const p = productos.find(x => x.id === id);
+            const existente = carrito.find(x => x.id === id);
+            if (existente) existente.cant++;
+            else carrito.push({...p, cant: 1});
             updateCartUI();
         }
 
@@ -178,12 +176,11 @@
             let total = 0;
             lista.innerHTML = carrito.map(item => {
                 total += (item.precio * item.cant);
-                return `
-                    <div class="item-carrito">
-                        <span><b>${item.cant}x</b> ${item.nombre}</span>
-                        <span>$${(item.precio * item.cant).toFixed(2)}</span>
-                        <button class="btn-del" onclick="removeFromCart(${item.id})">✕</button>
-                    </div>`;
+                return `<div class="item-carrito">
+                    <span>${item.cant}x ${item.nombre}</span>
+                    <span>$${(item.precio * item.cant).toFixed(2)}</span>
+                    <button class="btn-del" onclick="removeFromCart(${item.id})">✕</button>
+                </div>`;
             }).join('');
             document.getElementById('total-pos').innerText = total.toFixed(2);
         }
@@ -193,6 +190,7 @@
             updateCartUI();
         }
 
+        // ACCIONES BD
         async function saveProduct() {
             const n = document.getElementById('p-nombre').value;
             const p = document.getElementById('p-precio').value;
@@ -202,59 +200,54 @@
         }
 
         async function deleteProd(id) {
-            if(confirm("¿Eliminar producto?")) {
-                await _supabase.from('productos').delete().eq('id', id);
-                loadData();
-            }
+            await _supabase.from('productos').delete().eq('id', id);
+            loadData();
         }
 
         async function finalizarVenta() {
             if (carrito.length === 0) return;
             const total = document.getElementById('total-pos').innerText;
             const detalles = carrito.map(i => `${i.cant}x ${i.nombre}`).join(', ');
-            
+
             const { error } = await _supabase.from('ventas').insert([{ total, detalles, user_id: userSession.user.id }]);
             
             if (!error) {
-                imprimirTicket();
+                imprimirTicket(total, detalles);
                 carrito = [];
                 updateCartUI();
                 loadFinanzas();
             }
         }
 
-        function imprimirTicket() {
+        // IMPRESIÓN (OPTIMIZADA)
+        function imprimirTicket(total, detalles) {
             const fecha = new Date().toLocaleString();
-            const total = document.getElementById('total-pos').innerText;
-            
-            // Agrupamos por categoría para el ticket
-            const agrupar = (cat) => carrito.filter(i => i.categoria === cat);
-            const plancha = agrupar('plancha');
-            const bebidas = agrupar('bebidas');
-            const freidora = agrupar('freidora');
-
-            const genSeccion = (titulo, items) => {
-                if (items.length === 0) return "";
-                return `<div style="text-align:center; font-weight:bold; margin-top:10px;">--- ${titulo} ---</div>` +
-                    items.map(i => `<div style="display:flex; justify-content:space-between;"><span>${i.cant}x ${i.nombre.substring(0,15)}</span><span>$${(i.precio * i.cant).toFixed(2)}</span></div>`).join('');
-            };
-
             const win = window.open('', '', 'width=300,height=600');
+            
+            if (!win) {
+                alert("¡Atención! El navegador bloqueó la impresión. Por favor, permite las ventanas emergentes (pop-ups) para imprimir el ticket.");
+                return;
+            }
+
+            const agrupar = (cat) => carrito.filter(i => i.categoria === cat);
+            const secciones = ['plancha', 'bebidas', 'freidora'].map(cat => {
+                const items = agrupar(cat);
+                if (items.length === 0) return "";
+                return `<div style="text-align:center; font-weight:bold; margin-top:10px;">-- ${cat.toUpperCase()} --</div>` +
+                       items.map(i => `<div style="display:flex; justify-content:space-between;"><span>${i.cant}x ${i.nombre}</span><span>$${(i.precio * i.cant).toFixed(2)}</span></div>`).join('');
+            }).join('');
+
             win.document.write(`
                 <html><head><style>
                     body { font-family: monospace; width: 58mm; padding: 2mm; font-size: 12px; }
                     .center { text-align: center; }
                 </style></head><body>
-                    <div class="center"><strong>BODO BIRRIA</strong><br>Ticket de Venta<br>${fecha}</div>
+                    <div class="center"><strong>BODO BIRRIA</strong><br>${fecha}</div>
                     <div style="border-top:1px dashed #000; margin:5px 0;"></div>
-                    ${genSeccion('PLANCHA', plancha)}
-                    ${genSeccion('BEBIDAS', bebidas)}
-                    ${genSeccion('FREIDORA', freidora)}
-                    <div style="border-top:1px dashed #000; margin:10px 0;"></div>
-                    <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px;">
-                        <span>TOTAL:</span><span>$${total}</span>
-                    </div>
-                    <div class="center" style="margin-top:20px;">¡Gracias por su preferencia!<br>BODO POS Cloud</div>
+                    ${secciones}
+                    <div style="border-top:1px dashed #000; margin:5px 0;"></div>
+                    <div style="display:flex; justify-content:space-between; font-weight:bold;"><span>TOTAL:</span><span>$${total}</span></div>
+                    <div class="center" style="margin-top:20px;">¡Gracias!<br>BODO POS</div>
                     <script>window.onload = function(){ window.print(); window.close(); };<\/script>
                 </body></html>
             `);
@@ -264,20 +257,12 @@
         async function loadFinanzas() {
             const { data } = await _supabase.from('ventas').select('*').order('fecha', { ascending: false });
             if (!data) return;
-            let hoy = 0, mes = 0, ano = 0;
-            const now = new Date();
+            let hoy = 0;
             data.forEach(v => {
-                const f = new Date(v.fecha);
-                if (f.toDateString() === now.toDateString()) hoy += parseFloat(v.total);
-                if (f.getMonth() === now.getMonth() && f.getFullYear() === now.getFullYear()) mes += parseFloat(v.total);
-                if (f.getFullYear() === now.getFullYear()) ano += parseFloat(v.total);
+                if (new Date(v.fecha).toDateString() === new Date().toDateString()) hoy += parseFloat(v.total);
             });
             document.getElementById('v-hoy').innerText = `$${hoy.toFixed(2)}`;
-            document.getElementById('v-mes').innerText = `$${mes.toFixed(2)}`;
-            document.getElementById('v-ano').innerText = `$${ano.toFixed(2)}`;
-            document.getElementById('lista-ventas-db').innerHTML = data.map(v => `
-                <tr><td>${new Date(v.fecha).toLocaleString()}</td><td>$${v.total}</td><td>${v.detalles}</td></tr>
-            `).join('');
+            document.getElementById('lista-ventas-db').innerHTML = data.map(v => `<tr><td>${new Date(v.fecha).toLocaleTimeString()}</td><td>$${v.total}</td><td>${v.detalles}</td></tr>`).join('');
         }
 
         function openTab(id) {

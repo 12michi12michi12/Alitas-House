@@ -10,9 +10,16 @@
             --bg: #000; --panel: #121212; --accent: #ffeb3b; 
             --text: #ffffff; --green: #00e676; --red: #ff5252;
         }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; padding-bottom: 60px; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; padding-bottom: 80px; }
         
-        /* Navegación Inferior Estilo App */
+        /* Cabecera con Salir */
+        .header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 10px 15px; background: #111; border-bottom: 1px solid #333;
+        }
+        .btn-logout { background: none; border: 1px solid var(--red); color: var(--red); padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+
+        /* Navegación Inferior */
         .bottom-nav { 
             position: fixed; bottom: 0; width: 100%; background: #111; 
             display: flex; border-top: 1px solid #333; z-index: 1000; 
@@ -24,125 +31,105 @@
         .nav-item.active { color: var(--accent); }
         .nav-item span { display: block; font-size: 20px; margin-bottom: 4px; }
 
-        /* Contenedores */
         .content { display: none; padding: 15px; animation: fadeIn 0.3s; }
         .content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .panel { 
             background: var(--panel); border-radius: 16px; padding: 15px; 
-            margin-bottom: 15px; border: 1px solid #222; box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+            margin-bottom: 15px; border: 1px solid #222; 
         }
 
-        /* Ventas Grid */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
         .card { 
             background: #1a1a1a; border: 1px solid #333; padding: 20px 10px; 
             text-align: center; border-radius: 12px; font-weight: bold; cursor: pointer;
-            transition: 0.2s; -webkit-tap-highlight-color: transparent;
+            -webkit-tap-highlight-color: transparent;
         }
         .card:active { background: #333; transform: scale(0.95); }
-        .card.bebida { border-left: 4px solid #00e5ff; }
-        .card.plancha { border-left: 4px solid #ff5722; }
-        .card.freidora { border-left: 4px solid #ffeb3b; }
 
-        /* Botones e Inputs */
         input, select { 
             width: 100%; padding: 14px; margin: 8px 0; background: #1a1a1a; 
             border: 1px solid #333; color: #fff; border-radius: 8px; font-size: 16px;
         }
         .btn { 
             width: 100%; padding: 16px; border-radius: 12px; border: none; 
-            font-weight: 900; font-size: 16px; cursor: pointer; transition: 0.2s;
+            font-weight: 900; font-size: 16px; cursor: pointer; 
         }
         .btn-success { background: var(--green); color: #000; }
         .btn-danger { background: var(--red); color: #fff; }
         .btn-accent { background: var(--accent); color: #000; }
 
-        /* Carrito */
         .cart-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #222; }
-        
         #auth-view { padding: 80px 25px; text-align: center; }
     </style>
 </head>
 <body>
 
-    <!-- VISTA LOGIN -->
     <div id="auth-view">
         <h1 style="color: var(--accent); font-size: 3rem;">BODO</h1>
-        <p style="color: #666; margin-bottom: 30px;">Sistema de Gestión de Alimentos</p>
         <input type="email" id="email" placeholder="Correo electrónico">
         <input type="password" id="pass" placeholder="Contraseña">
-        <button class="btn btn-accent" style="margin-top: 15px;" onclick="doLogin()">ENTRAR AL SISTEMA</button>
+        <button class="btn btn-accent" style="margin-top: 15px;" onclick="doLogin()">ENTRAR</button>
     </div>
 
-    <!-- VISTA APP -->
     <div id="app-view" style="display:none;">
-        
-        <!-- PESTAÑA VENTAS -->
+        <header class="header">
+            <span style="color: var(--accent); font-weight: bold;">BODOBirria POS</span>
+            <button class="btn-logout" onclick="doLogout()">CERRAR SESIÓN</button>
+        </header>
+
         <div id="v-pos" class="content active">
             <div class="grid" id="grid-p"></div>
             <div class="panel" style="margin-top: 25px;">
-                <h3 style="margin-top:0">COMANDA ACTUAL</h3>
-                <div id="cart-list" style="min-height: 50px;"></div>
+                <h3>ORDEN</h3>
+                <div id="cart-list"></div>
                 <div style="display:flex; justify-content: space-between; margin: 20px 0;">
                     <span style="font-size: 1.5rem; font-weight: bold;">TOTAL</span>
                     <span style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">$<span id="total-val">0</span></span>
                 </div>
-                <button class="btn btn-success" onclick="processSale()">FINALIZAR Y TICKETS</button>
-                <button class="btn" style="background:none; color: #555; margin-top: 10px;" onclick="clearCart()">Limpiar Orden</button>
+                <button class="btn btn-success" onclick="processSale()">COBRAR E IMPRIMIR</button>
             </div>
         </div>
 
-        <!-- PESTAÑA GASTOS -->
         <div id="v-gastos" class="content">
             <div class="panel">
-                <h3>REGISTRAR SALIDA DE DINERO</h3>
-                <input type="text" id="g-desc" placeholder="Concepto (ej. Pago de gas)">
-                <input type="number" id="g-monto" placeholder="Cantidad $">
+                <h3>GASTOS</h3>
+                <input type="text" id="g-desc" placeholder="Concepto">
+                <input type="number" id="g-monto" placeholder="Monto $">
                 <button class="btn btn-danger" onclick="addExpense()">GUARDAR GASTO</button>
             </div>
-            <div id="expense-history"></div>
         </div>
 
-        <!-- PESTAÑA CORTE -->
         <div id="v-corte" class="content">
-            <div class="panel" style="text-align:center; padding: 30px 15px;">
-                <h2 style="margin:0">CORTE DE CAJA</h2>
-                <p id="c-fecha" style="color:#666"></p>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 30px 0;">
-                    <div class="panel" style="margin:0; border-color: var(--green);">
-                        <small>VENTAS</small><br><strong style="font-size: 1.5rem;" id="sum-v">$0</strong>
-                    </div>
-                    <div class="panel" style="margin:0; border-color: var(--red);">
-                        <small>GASTOS</small><br><strong style="font-size: 1.5rem;" id="sum-g">$0</strong>
-                    </div>
+            <div class="panel" style="text-align:center;">
+                <h2>CORTE HOY</h2>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0;">
+                    <div class="panel">Ventas:<br><strong id="sum-v">$0</strong></div>
+                    <div class="panel">Gastos:<br><strong id="sum-g">$0</strong></div>
                 </div>
                 <div class="panel" style="background: var(--accent); color: #000;">
-                    <small>BALANCE NETO EN CAJA</small><br>
-                    <strong style="font-size: 2rem;" id="sum-neto">$0</strong>
+                    NETO: <strong id="sum-neto">$0</strong>
                 </div>
-                <button class="btn btn-accent" onclick="confirmClosing()">EFECTUAR CIERRE DE CAJA</button>
+                <button class="btn btn-accent" onclick="confirmClosing()">HACER CORTE</button>
             </div>
         </div>
 
-        <!-- PESTAÑA MENU -->
         <div id="v-menu" class="content">
             <div class="panel">
-                <h3>AGREGAR / EDITAR PRODUCTO</h3>
+                <h3>NUEVO PRODUCTO</h3>
                 <input type="text" id="m-name" placeholder="Nombre">
-                <input type="number" id="m-price" placeholder="Precio $">
+                <input type="number" id="m-price" placeholder="Precio">
                 <select id="m-cat">
                     <option value="plancha">Plancha</option>
                     <option value="bebidas">Bebidas</option>
                     <option value="freidora">Freidora</option>
                 </select>
-                <button class="btn btn-success" onclick="saveProduct()">ACTUALIZAR MENÚ</button>
+                <button class="btn btn-success" onclick="saveProduct()">GUARDAR</button>
             </div>
             <div id="admin-list"></div>
         </div>
 
-        <!-- NAVEGACIÓN -->
         <nav class="bottom-nav">
             <button class="nav-item active" onclick="showTab('v-pos', this)"><span>🛒</span>VENTA</button>
             <button class="nav-item" onclick="showTab('v-gastos', this)"><span>💸</span>GASTOS</button>
@@ -152,14 +139,12 @@
     </div>
 
 <script>
-    // Configuración Base de Datos
     const SUPA_URL = 'https://twqscsjdhklectswcjml.supabase.co';
     const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3cXNjc2pkaGtsZWN0c3djam1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0Njc4OTAsImV4cCI6MjA5MzA0Mzg5MH0.8zz26TNZ26FUdFNYv0ao7kon79LBRbnzF_1MBbzttZk';
     const client = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-    let products = [], cart = [], totals = { v: 0, g: 0 }, currentUser = "";
+    let products = [], cart = [], currentUser = "";
 
-    // Seguridad e Inicio
     client.auth.onAuthStateChange((event, session) => {
         if (session) {
             currentUser = session.user.id;
@@ -170,13 +155,13 @@
     });
 
     async function doLogin() {
-        const e = document.getElementById('email').value;
-        const p = document.getElementById('pass').value;
+        const e = document.getElementById('email').value, p = document.getElementById('pass').value;
         const { error } = await client.auth.signInWithPassword({ email: e, password: p });
-        if (error) alert("Acceso denegado: " + error.message);
+        if (error) alert("Error: " + error.message);
     }
 
-    // Gestión de Datos
+    async function doLogout() { await client.auth.signOut(); window.location.reload(); }
+
     async function refreshData() {
         const { data: p } = await client.from('productos').select('*').order('nombre');
         products = p || [];
@@ -185,24 +170,11 @@
     }
 
     function renderPOS() {
-        const grid = document.getElementById('grid-p');
-        const admin = document.getElementById('admin-list');
-        
-        grid.innerHTML = products.map(p => `
-            <div class="card ${p.categoria}" onclick="addToCart(${p.id})">
-                ${p.nombre}<br><small>$${p.precio}</small>
-            </div>
-        `).join('');
-
-        admin.innerHTML = products.map(p => `
-            <div class="panel" style="display:flex; justify-content:space-between; align-items:center;">
-                <div><strong>${p.nombre}</strong><br><small>$${p.precio} - ${p.categoria}</small></div>
-                <button onclick="deleteProduct(${p.id})" style="width:auto; background:none; border:none; color:var(--red);">ELIMINAR</button>
-            </div>
+        document.getElementById('grid-p').innerHTML = products.map(p => `
+            <div class="card" onclick="addToCart(${p.id})">${p.nombre}<br>$${p.precio}</div>
         `).join('');
     }
 
-    // Lógica del Carrito
     function addToCart(id) {
         const p = products.find(x => x.id === id);
         const exists = cart.find(x => x.id === id);
@@ -219,118 +191,76 @@
         document.getElementById('total-val').innerText = t;
     }
 
-    function clearCart() { cart = []; renderCart(); }
-
-    // Procesar Venta e Impresión
     async function processSale() {
         if (cart.length === 0) return;
         const total = document.getElementById('total-val').innerText;
-        const detalles = cart.map(i => `${i.qty}x ${i.nombre}`).join(', ');
-
         const { error } = await client.from('ventas').insert([{
-            total: parseFloat(total), detalles: detalles, user_id: currentUser
+            total: parseFloat(total), detalles: cart.map(i => `${i.qty}x ${i.nombre}`).join(', '), user_id: currentUser
         }]);
 
         if (!error) {
             handlePrinting();
-            clearCart();
+            cart = [];
+            renderCart();
             updateBalance();
-            alert("Venta registrada con éxito");
-        } else {
-            alert("Error al guardar venta: " + error.message);
         }
     }
 
+    // Impresión unificada para celular
     function handlePrinting() {
-        const ticketDate = new Date().toLocaleString();
         const win = window.open('', '_blank');
         let content = `<html><body style="font-family:monospace; width:58mm; padding:2px; font-size:12px;">
-            <center><strong>BODO BIRRIA</strong><br>${ticketDate}</center><hr>`;
+            <center><strong>BODOBirria</strong><br>${new Date().toLocaleString()}</center><hr>`;
 
         ['plancha', 'bebidas', 'freidora'].forEach(cat => {
             const items = cart.filter(i => i.categoria === cat);
             if (items.length > 0) {
                 content += `<div style="text-align:center; margin-top:10px;">-- ${cat.toUpperCase()} --</div>`;
                 items.forEach(i => content += `<div>${i.qty}x ${i.nombre}</div>`);
-                content += `<hr style="border: 0.5px dashed #000">`;
+                content += `<p>--------------------------</p>`; // Línea de corte
             }
         });
 
-        content += `<center><br>TOTAL: $${document.getElementById('total-val').innerText}<br>¡GRACIAS POR SU COMPRA!</center>
+        content += `<center>TOTAL: $${document.getElementById('total-val').innerText}</center>
             <script>window.onload=function(){ window.print(); setTimeout(window.close, 1000); };<\/script></body></html>`;
         
         win.document.write(content);
         win.document.close();
     }
 
-    // Gastos y Corte
     async function addExpense() {
-        const d = document.getElementById('g-desc').value;
-        const m = document.getElementById('g-monto').value;
-        if (!d || !m) return alert("Completa los campos");
-
-        const { error } = await client.from('gastos').insert([{
-            concepto: d, monto: parseFloat(m), user_id: currentUser
-        }]);
-
-        if (!error) {
-            document.getElementById('g-desc').value = "";
-            document.getElementById('g-monto').value = "";
-            updateBalance();
-            alert("Gasto guardado");
-        }
+        const d = document.getElementById('g-desc').value, m = document.getElementById('g-monto').value;
+        await client.from('gastos').insert([{ concepto: d, monto: parseFloat(m), user_id: currentUser }]);
+        document.getElementById('g-desc').value = ""; document.getElementById('g-monto').value = "";
+        updateBalance();
     }
 
     async function updateBalance() {
         const hoy = new Date().toISOString().split('T')[0];
-        document.getElementById('c-fecha').innerText = new Date().toLocaleDateString();
-
         const { data: v } = await client.from('ventas').select('total').gte('fecha', hoy);
         const { data: g } = await client.from('gastos').select('monto').gte('fecha', hoy);
-
-        totals.v = v ? v.reduce((a, b) => a + b.total, 0) : 0;
-        totals.g = g ? g.reduce((a, b) => a + b.monto, 0) : 0;
-
-        document.getElementById('sum-v').innerText = `$${totals.v}`;
-        document.getElementById('sum-g').innerText = `$${totals.g}`;
-        document.getElementById('sum-neto').innerText = `$${totals.v - totals.g}`;
+        const tv = v ? v.reduce((a, b) => a + b.total, 0) : 0;
+        const tg = g ? g.reduce((a, b) => a + b.monto, 0) : 0;
+        document.getElementById('sum-v').innerText = `$${tv}`;
+        document.getElementById('sum-g').innerText = `$${tg}`;
+        document.getElementById('sum-neto').innerText = `$${tv - tg}`;
     }
 
     async function confirmClosing() {
-        if (!confirm("¿Cerrar caja hoy con $" + (totals.v - totals.g) + "?")) return;
-        
-        const { error } = await client.from('cortes_caja').insert([{
-            total_ventas: totals.v,
-            total_gastos: totals.g,
-            balance_final: totals.v - totals.g,
-            user_id: currentUser
+        const tv = document.getElementById('sum-v').innerText.replace('$','');
+        const tg = document.getElementById('sum-g').innerText.replace('$','');
+        await client.from('cortes_caja').insert([{
+            total_ventas: parseFloat(tv), total_gastos: parseFloat(tg), balance_final: tv - tg, user_id: currentUser
         }]);
-
-        if (!error) alert("CORTE REALIZADO EXITOSAMENTE");
-        else alert("Error al cerrar: " + error.message);
+        alert("Corte realizado");
     }
 
-    // Administración Menú
     async function saveProduct() {
-        const n = document.getElementById('m-name').value;
-        const p = document.getElementById('m-price').value;
-        const c = document.getElementById('m-cat').value;
-        if(!n || !p) return alert("Faltan datos");
-
-        await client.from('productos').insert([{
-            nombre: n, precio: parseFloat(p), categoria: c, user_id: currentUser
-        }]);
+        const n = document.getElementById('m-name').value, p = document.getElementById('m-price').value, c = document.getElementById('m-cat').value;
+        await client.from('productos').insert([{ nombre: n, precio: parseFloat(p), categoria: c, user_id: currentUser }]);
         refreshData();
     }
 
-    async function deleteProduct(id) {
-        if(confirm("¿Borrar este producto?")) {
-            await client.from('productos').delete().eq('id', id);
-            refreshData();
-        }
-    }
-
-    // UI Navigation
     function showTab(id, btn) {
         document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));

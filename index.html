@@ -1,254 +1,116 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>POS Master Cloud - BODOBirria</title>
-    <!-- Librería de Supabase -->
+    <title>BODOBirria - POS Cloud v3</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <style>
         :root {
-            --bg: #0a0a0a; 
-            --panel: #151515; 
-            --text: #ffffff;
-            --accent: #ffeb3b; 
-            --bebidas: #00e5ff; 
-            --plancha: #ff5722;
-            --freidora: #ffeb3b; 
-            --danger: #ff4444; 
-            --success: #4caf50;
+            --bg: #0a0a0a; --panel: #151515; --text: #ffffff;
+            --accent: #ffeb3b; --bebidas: #00e5ff; --plancha: #ff5722;
+            --freidora: #ffeb3b; --danger: #ff4444; --success: #4caf50;
         }
-
-        body { 
-            background-color: var(--bg); 
-            color: var(--text); 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            margin: 0; 
-            overflow-x: hidden;
-        }
-        
-        /* Pantalla de Login */
-        #auth-view { 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            background: #000; 
-        }
-        .login-box { 
-            background: var(--panel); 
-            padding: 30px; 
-            border-radius: 15px; 
-            border: 2px solid var(--accent); 
-            width: 320px; 
-            text-align: center; 
-            box-shadow: 0 0 20px rgba(255,235,59,0.2); 
-        }
-
-        /* App Principal */
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; }
+        #auth-view { display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .login-box { background: var(--panel); padding: 30px; border-radius: 15px; border: 2px solid var(--accent); width: 320px; text-align: center; }
         #app-view { display: none; }
-
-        .tabs { 
-            display: flex; 
-            background: #111; 
-            border-bottom: 2px solid #fff; 
-            position: sticky; 
-            top: 0; 
-            z-index: 100; 
-        }
-        .tab-btn { 
-            flex: 1; 
-            padding: 15px; 
-            border: none; 
-            background: none; 
-            color: #888; 
-            cursor: pointer; 
-            font-weight: bold; 
-            text-transform: uppercase; 
-            transition: 0.3s;
-        }
-        .tab-btn.active { 
-            color: var(--accent); 
-            border-bottom: 3px solid var(--accent); 
-            background: rgba(255,235,59,0.1);
-        }
-
-        .tab-content { display: none; padding: 20px; animation: fadeIn 0.3s; }
+        .tabs { display: flex; background: #111; border-bottom: 2px solid #fff; overflow-x: auto; }
+        .tab-btn { flex: 1; padding: 15px; border: none; background: none; color: #888; cursor: pointer; font-weight: bold; min-width: 120px; }
+        .tab-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); background: rgba(255,235,59,0.1); }
+        .tab-content { display: none; padding: 20px; }
         .tab-content.active { display: block; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* Paneles con tu estilo original */
-        .panel { 
-            background: var(--panel); 
-            border: 2px solid #fff; 
-            border-radius: 15px; 
-            padding: 15px; 
-            display: flex; 
-            flex-direction: column; 
-            box-shadow: 5px 5px 0px #000; 
-            margin-bottom: 15px; 
-        }
-        
-        input, select, button { 
-            padding: 12px; 
-            margin-bottom: 10px; 
-            border-radius: 8px; 
-            border: 1px solid #444; 
-            background: #222; 
-            color: #fff; 
-            width: 100%; 
-            box-sizing: border-box; 
-            font-size: 1rem;
-        }
-        
-        .btn-main { 
-            background: var(--success); 
-            border: none; 
-            font-weight: bold; 
-            cursor: pointer; 
-            color: white; 
-            text-transform: uppercase;
-        }
-        .btn-main:active { transform: scale(0.98); }
-
-        .btn-logout { 
-            background: var(--danger); 
-            border: none; 
-            color: white; 
-            padding: 5px 15px; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            width: auto; 
-            font-size: 0.8rem; 
-        }
-        
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
-        th, td { border: 1px solid #333; padding: 10px; text-align: left; }
-        th { background: #222; color: var(--accent); text-transform: uppercase; }
-
-        /* Grid de Ventas */
+        .panel { background: var(--panel); border: 2px solid #fff; border-radius: 15px; padding: 15px; box-shadow: 5px 5px 0px #000; margin-bottom: 15px; }
+        input, select, button { padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #444; background: #222; color: #fff; width: 100%; box-sizing: border-box; }
+        .btn-main { background: var(--success); border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; }
         .grid-pos { display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
-        .menu-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
-            gap: 15px; 
-            overflow-y: auto; 
-            max-height: 70vh; 
-        }
-        
-        /* Tus Tarjetas de Producto */
-        .card { 
-            background: #222; 
-            border: 2px solid #fff; 
-            border-radius: 12px; 
-            padding: 15px; 
-            text-align: center; 
-            cursor: pointer; 
-            font-weight: bold; 
-            transition: 0.2s; 
-            box-shadow: 3px 3px 0px #000;
-            min-height: 90px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        .card:active { transform: scale(0.92); background: #333; }
-        
-        /* Colores de bordes por categoría */
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+        .card { background: #222; border: 2px solid #fff; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; box-shadow: 3px 3px 0px #000; }
         .card.plancha { border-color: var(--plancha); }
         .card.bebidas { border-color: var(--bebidas); }
         .card.freidora { border-color: var(--freidora); }
-
-        .item-carrito { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 12px 0; 
-            border-bottom: 1px solid #333; 
-        }
-        .btn-remove { 
-            background: var(--danger); 
-            color: white; 
-            border: none; 
-            padding: 5px 10px; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            width: auto; 
-            font-weight: bold;
-        }
-
-        @media (max-width: 1000px) { 
-            .grid-pos { grid-template-columns: 1fr; } 
-            .menu-grid { grid-template-columns: repeat(2, 1fr); }
-        }
+        .item-carrito { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #333; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .stat-card { background: #222; padding: 20px; border-radius: 10px; border: 1px solid var(--accent); text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #333; padding: 10px; text-align: left; }
+        @media (max-width: 800px) { .grid-pos { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
     <div id="auth-view">
         <div class="login-box">
-            <h1 style="color: var(--accent); margin: 0; font-size: 2.2rem;">BODO POS</h1>
-            <p style="margin-bottom: 20px; opacity: 0.7;">Cloud System</p>
-            <input type="email" id="email" placeholder="Usuario (Email)">
-            <input type="password" id="pass" placeholder="Contraseña">
-            <button class="btn-main" style="padding: 15px;" onclick="handleAuth()">ENTRAR</button>
+            <h1 style="color: var(--accent);">BODO POS</h1>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="pass" placeholder="Password">
+            <button class="btn-main" onclick="handleAuth()">ENTRAR</button>
         </div>
     </div>
 
     <div id="app-view">
-        <div style="background: #111; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333;">
-            <span id="user-info" style="font-size: 0.85rem; color: var(--accent); font-weight: bold;"></span>
-            <button class="btn-logout" onclick="signOut()">CERRAR SESIÓN</button>
+        <div style="background: #111; padding: 10px; display: flex; justify-content: space-between;">
+            <span id="user-info"></span>
+            <button onclick="signOut()" style="width:auto; padding: 5px 10px; background: var(--danger);">SALIR</button>
         </div>
 
         <nav class="tabs">
-            <button id="btn-pos" class="tab-btn active" onclick="openTab('pos')">🛒 VENTAS</button>
-            <button id="btn-inv" class="tab-btn" onclick="openTab('inventario')">📦 MI MENÚ</button>
+            <button class="tab-btn active" onclick="openTab('pos')">🛒 VENTAS</button>
+            <button class="tab-btn" onclick="openTab('inventario')">📦 MENÚ</button>
+            <button class="tab-btn" onclick="openTab('finanzas')">📊 FINANZAS</button>
         </nav>
 
+        <!-- VENTAS -->
         <div id="pos" class="tab-content active">
             <div class="grid-pos">
                 <div class="panel">
-                    <h3 style="color: var(--accent); margin-top: 0;">MENÚ</h3>
+                    <h3>MENÚ</h3>
                     <div id="grid-venta" class="menu-grid"></div>
                 </div>
-
                 <div class="panel">
-                    <h3 style="margin-top: 0;">ORDEN</h3>
-                    <div id="carrito-lista" style="flex:1; overflow-y:auto; min-height: 250px;"></div>
-                    <hr style="border-color: #333;">
-                    <h2 style="text-align:right; color: var(--accent); margin: 10px 0;">TOTAL: $<span id="total-pos">0.00</span></h2>
-                    <button class="btn-main" style="padding:20px; font-size:1.2rem" onclick="finalizarVenta()">IMPRIMIR TICKET</button>
+                    <h3>ORDEN</h3>
+                    <div id="carrito-lista" style="min-height: 200px;"></div>
+                    <h2>TOTAL: $<span id="total-pos">0.00</span></h2>
+                    <button class="btn-main" onclick="registrarVenta()">FINALIZAR Y COBRAR</button>
                 </div>
             </div>
         </div>
 
+        <!-- INVENTARIO -->
         <div id="inventario" class="tab-content">
-            <div class="grid-pos">
-                <div class="panel">
-                    <h3>NUEVO PRODUCTO</h3>
-                    <input type="text" id="p-nombre" placeholder="Nombre">
-                    <input type="number" id="p-precio" placeholder="Precio $">
-                    <select id="p-cat">
-                        <option value="plancha">Plancha</option>
-                        <option value="bebidas">Bebidas</option>
-                        <option value="freidora">Freidora</option>
-                    </select>
-                    <button class="btn-main" onclick="saveProduct()">GUARDAR EN NUBE</button>
-                </div>
+            <div class="panel">
+                <h3>AGREGAR PRODUCTO</h3>
+                <input type="text" id="p-nombre" placeholder="Nombre">
+                <input type="number" id="p-precio" placeholder="Precio">
+                <select id="p-cat">
+                    <option value="plancha">Plancha</option>
+                    <option value="bebidas">Bebidas</option>
+                    <option value="freidora">Freidora</option>
+                </select>
+                <button class="btn-main" onclick="saveProduct()">GUARDAR</button>
+            </div>
+            <div class="panel">
+                <table>
+                    <thead><tr><th>Nombre</th><th>Precio</th><th>Acción</th></tr></thead>
+                    <tbody id="tabla-productos"></tbody>
+                </table>
+            </div>
+        </div>
 
-                <div class="panel">
-                    <h3>GESTIÓN</h3>
-                    <table>
-                        <thead>
-                            <tr><th>Nombre</th><th>Precio</th><th>Categoría</th><th></th></tr>
-                        </thead>
-                        <tbody id="tabla-gestion-nube"></tbody>
-                    </table>
-                </div>
+        <!-- FINANZAS -->
+        <div id="finanzas" class="tab-content">
+            <div class="stats-grid">
+                <div class="stat-card"><h3>HOY</h3><h2 id="venta-hoy">$0.00</h2></div>
+                <div class="stat-card"><h3>MES</h3><h2 id="venta-mes">$0.00</h2></div>
+                <div class="stat-card"><h3>AÑO</h3><h2 id="venta-ano">$0.00</h2></div>
+            </div>
+            <div class="panel" style="margin-top: 20px;">
+                <h3>CORTE DE CAJA (HISTORIAL)</h3>
+                <button class="btn-main" style="background: var(--accent); color: #000;" onclick="loadFinanzas()">ACTUALIZAR DATOS</button>
+                <table id="tabla-ventas">
+                    <thead><tr><th>Fecha</th><th>Total</th><th>Detalles</th></tr></thead>
+                    <tbody id="lista-ventas-db"></tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -262,138 +124,107 @@
         let productos = [];
         let carrito = [];
 
-        _supabase.auth.onAuthStateChange((event, session) => {
+        _supabase.auth.onAuthStateChange((e, session) => {
             userSession = session;
             if (session) {
                 document.getElementById('auth-view').style.display = 'none';
                 document.getElementById('app-view').style.display = 'block';
-                document.getElementById('user-info').innerText = `BIENVENIDO: ${session.user.email}`;
                 loadProducts();
-            } else {
-                document.getElementById('auth-view').style.display = 'flex';
-                document.getElementById('app-view').style.display = 'none';
+                loadFinanzas();
             }
         });
 
         async function handleAuth() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('pass').value;
-            const { error } = await _supabase.auth.signInWithPassword({ email, password });
-            if (error) {
-                const { error: signUpError } = await _supabase.auth.signUp({ email, password });
-                if (signUpError) alert("Error: " + signUpError.message);
-                else alert("Usuario creado. Revisa tu email o intenta entrar.");
-            }
+            await _supabase.auth.signInWithPassword({ email, password });
         }
 
         async function signOut() { await _supabase.auth.signOut(); }
 
         async function saveProduct() {
             const n = document.getElementById('p-nombre').value;
-            const p = parseFloat(document.getElementById('p-precio').value);
+            const p = document.getElementById('p-precio').value;
             const c = document.getElementById('p-cat').value;
-            
-            if(!n || isNaN(p)) return alert("Llena todos los campos");
-
-            // IMPORTANTE: Asegúrate de que tu tabla se llame 'productos' y tenga estas columnas
-            const { error } = await _supabase.from('productos').insert([{
-                nombre: n, 
-                precio: p, 
-                categoria: c, 
-                user_id: userSession.user.id
-            }]);
-
-            if (error) {
-                console.error(error);
-                alert("Error al guardar: " + error.message);
-            } else {
-                document.getElementById('p-nombre').value = "";
-                document.getElementById('p-precio').value = "";
-                loadProducts();
-            }
+            const { error } = await _supabase.from('productos').insert([{ nombre: n, precio: p, categoria: c, user_id: userSession.user.id }]);
+            if (error) alert("Error: " + error.message); else loadProducts();
         }
 
         async function loadProducts() {
-            const { data, error } = await _supabase
-                .from('productos')
-                .select('*')
-                .order('nombre', { ascending: true });
-
-            if (data) {
-                productos = data;
-                renderApp();
-            }
+            const { data } = await _supabase.from('productos').select('*');
+            productos = data || [];
+            renderProducts();
         }
 
-        async function deleteProduct(id) {
-            if(confirm("¿Eliminar producto?")) {
-                await _supabase.from('productos').delete().eq('id', id);
-                loadProducts();
-            }
-        }
-
-        function renderApp() {
+        function renderProducts() {
             const grid = document.getElementById('grid-venta');
             grid.innerHTML = "";
-            productos.forEach(prod => {
-                const d = document.createElement('div');
-                d.className = `card ${prod.categoria}`;
-                d.innerHTML = `<span>${prod.nombre}</span><br><span style="color:var(--accent)">$${prod.precio}</span>`;
-                d.onclick = () => {
-                    const item = carrito.find(i => i.id === prod.id);
-                    if(item) item.cant++; else carrito.push({...prod, cant: 1});
-                    actualizarCarrito();
-                };
-                grid.appendChild(d);
+            productos.forEach(p => {
+                grid.innerHTML += `<div class="card ${p.categoria}" onclick="addToCart(${p.id})">${p.nombre}<br>$${p.precio}</div>`;
             });
-
-            const tabla = document.getElementById('tabla-gestion-nube');
-            tabla.innerHTML = "";
-            productos.forEach(prod => {
-                tabla.innerHTML += `
-                    <tr>
-                        <td>${prod.nombre}</td>
-                        <td>$${prod.precio}</td>
-                        <td>${prod.categoria}</td>
-                        <td><button class="btn-remove" onclick="deleteProduct(${prod.id})">✕</button></td>
-                    </tr>`;
-            });
+            const tabla = document.getElementById('tabla-productos');
+            tabla.innerHTML = productos.map(p => `<tr><td>${p.nombre}</td><td>$${p.precio}</td><td><button onclick="deleteProd(${p.id})">Eliminar</button></td></tr>`).join('');
         }
 
-        function actualizarCarrito() {
+        async function deleteProd(id) { await _supabase.from('productos').delete().eq('id', id); loadProducts(); }
+
+        function addToCart(id) {
+            const p = productos.find(x => x.id === id);
+            carrito.push(p);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
             const lista = document.getElementById('carrito-lista');
-            lista.innerHTML = "";
-            let total = 0;
-            carrito.forEach(item => {
-                total += (item.precio * item.cant);
-                lista.innerHTML += `
-                    <div class="item-carrito">
-                        <span><b>${item.cant}x</b> ${item.nombre}</span>
-                        <span>$${(item.precio * item.cant).toFixed(2)}</span>
-                        <button class="btn-remove" onclick="eliminarDelCarrito(${item.id})">✕</button>
-                    </div>`;
-            });
-            document.getElementById('total-pos').innerText = total.toFixed(2);
+            let t = 0;
+            lista.innerHTML = carrito.map(i => {
+                t += parseFloat(i.precio);
+                return `<div class="item-carrito"><span>${i.nombre}</span><span>$${i.precio}</span></div>`;
+            }).join('');
+            document.getElementById('total-pos').innerText = t.toFixed(2);
         }
 
-        function eliminarDelCarrito(id) {
-            carrito = carrito.filter(i => i.id !== id);
-            actualizarCarrito();
+        async function registrarVenta() {
+            if (carrito.length === 0) return;
+            const total = document.getElementById('total-pos').innerText;
+            const detalles = carrito.map(i => i.nombre).join(', ');
+            const { error } = await _supabase.from('ventas').insert([{ total, detalles, user_id: userSession.user.id }]);
+            if (!error) {
+                alert("Venta guardada en la nube");
+                carrito = [];
+                updateCartUI();
+                loadFinanzas();
+            }
+        }
+
+        async function loadFinanzas() {
+            const { data } = await _supabase.from('ventas').select('*').order('fecha', { ascending: false });
+            if (!data) return;
+            
+            let hoy = 0, mes = 0, ano = 0;
+            const d = new Date();
+            
+            data.forEach(v => {
+                const f = new Date(v.fecha);
+                if (f.toDateString() === d.toDateString()) hoy += parseFloat(v.total);
+                if (f.getMonth() === d.getMonth() && f.getFullYear() === d.getFullYear()) mes += parseFloat(v.total);
+                if (f.getFullYear() === d.getFullYear()) ano += parseFloat(v.total);
+            });
+
+            document.getElementById('venta-hoy').innerText = `$${hoy.toFixed(2)}`;
+            document.getElementById('venta-mes').innerText = `$${mes.toFixed(2)}`;
+            document.getElementById('venta-ano').innerText = `$${ano.toFixed(2)}`;
+            
+            document.getElementById('lista-ventas-db').innerHTML = data.map(v => `
+                <tr><td>${new Date(v.fecha).toLocaleString()}</td><td>$${v.total}</td><td>${v.detalles}</td></tr>
+            `).join('');
         }
 
         function openTab(id) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            if(id === 'pos') document.getElementById('btn-pos').classList.add('active');
-            else document.getElementById('btn-inv').classList.add('active');
-        }
-
-        function finalizarVenta() {
-            if(carrito.length === 0) return alert("Carrito vacío");
-            alert("Ticket Generado con éxito");
-            carrito = [];
-            actualizarCarrito();
+            event.currentTarget.classList.add('active');
         }
     </script>
 </body>
